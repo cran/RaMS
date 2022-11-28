@@ -13,10 +13,19 @@ test_that("error if weird files", {
   file.remove("blah.txt")
 })
 
+test_that("error if grab_what is weird", {
+  expect_error(grabMSdata(files = mzML_filenames[2], grab_what = "banana"))
+  expect_error(grabMSdata(files = mzML_filenames[2], grab_what = "SM1"))
+  expect_error(grabMSdata(files = mzML_filenames[1], grab_what = c(
+    "MS1", "MS2", "MS3"
+  )))
+  expect_error(grabMSdata(files = mzML_filenames[2], grab_what = ""))
+})
+
 test_that("checkOutputQuality detects things", {
   grab_what <- "everything"
   output_data <- list(MS1=data.table(runif(100)))
-  expect_error(checkOutputQuality(output_data, grab_what))
+  expect_warning(checkOutputQuality(output_data, grab_what))
 
   grab_what <- c("MS1", "MS2")
   output_data <- list(MS1=data.table(runif(100)), MS2=data.table())
@@ -41,6 +50,21 @@ test_that("checkProvidedMzPpm detects things", {
   expect_error(checkProvidedMzPpm(mz=100, ppm = NULL))
   expect_error(checkProvidedMzPpm(mz=100, ppm = "banana"))
   expect_error(checkProvidedMzPpm(mz=100, ppm = -3))
+})
+
+test_that("checkProvidedPrefilter does things", {
+  expect_warning(
+    one_out <- checkProvidedPrefilter("banana")
+  )
+  expect_identical(one_out, -1)
+
+  multi_prefilter <- 1:3
+  expect_warning(
+    multi_out <- checkProvidedPrefilter(multi_prefilter)
+  )
+  expect_identical(multi_out, 1L)
+
+  expect_warning(checkProvidedPrefilter(NA))
 })
 
 test_that("default verbosity works", {

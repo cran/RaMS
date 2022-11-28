@@ -18,13 +18,18 @@
 #'   absolute and relative paths are acceptable.
 #' @param grab_what What data should be read from the file? Options include
 #'   "MS1" for data only from the first spectrometer, "MS2" for fragmentation
-#'   data, "BPC" for rapid access to the base peak chromatogram, and "TIC" for
-#'   rapid access to the total ion chromatogram. These options can be combined
-#'   (i.e. `grab_data=c("MS1", "MS2", "BPC")`) or this argument can be set to
-#'   "everything" to extract all of the above. Options "EIC" and "EIC_MS2" are
-#'   useful when working with files whose total size exceeds working memory -
-#'   they first extracts all relevant MS1 and MS2 data, then discard data
-#'   outside of the mass range(s) calculated from the provided mz and ppm.
+#'   data, "BPC" for rapid access to the base peak chromatogram, "TIC" for rapid
+#'   access to the total ion chromatogram, "DAD" for DAD (UV) data, and "chroms"
+#'   for precompiled chromatogram data (especially useful for MRM but often
+#'   contains BPC/TIC in other files). Metadata can be accessed with "metadata",
+#'   which provides information about the instrument and time the file was run.
+#'   These options can be combined (i.e. `grab_data=c("MS1", "MS2", "BPC")`) or
+#'   this argument can be set to "everything" to extract all of the above.
+#'   Options "EIC" and "EIC_MS2" are useful when working with files whose total
+#'   size exceeds working memory - it first extracts all relevant MS1 and MS2
+#'   data, respectively, then discards data outside of the mass range(s)
+#'   calculated from the provided mz and ppm. The default, "everything",
+#'   includes all MS1, MS2, BPC, TIC, and metadata.
 #' @param verbosity Three levels of processing output to the R console are
 #'   available, with increasing verbosity corresponding to higher integers. A
 #'   verbosity of zero means that no output will be produced, useful when
@@ -44,17 +49,30 @@
 #'   containing an upper and lower bound on retention times of interest.
 #'   Providing a range here can speed up load times (although not enormously, as
 #'   the entire file must still be read) and reduce the final object's size.
+#' @param prefilter A single number corresponding to the minimum intensity of
+#'   interest in the MS1 data. Data points with intensities below this threshold
+#'   will be silently dropped, which can dramatically reduce the size of the
+#'   final object. Currently only works with MS1 data, but could be expanded
+#'   easily to handle more.
 #'
 #' @return A list of `data.table`s, each named after the arguments requested in
-#'   grab_what. $MS1 contains MS1 information, MS2 contains fragmentation info,
-#'   etc. MS1 data has four columns: retention time (rt), mass-to-charge (mz),
-#'   intensity (int), and filename. MS2 data has six: retention time (rt),
+#'   grab_what. E.g. $MS1 contains MS1 information, $MS2 contains fragmentation
+#'   info, etc. MS1 data has four columns: retention time (rt), mass-to-charge
+#'   (mz), intensity (int), and filename. MS2 data has six: retention time (rt),
 #'   precursor m/z (premz), fragment m/z (fragmz), fragment intensity (int),
 #'   collision energy (voltage), and filename. Data requested that does not
 #'   exist in the provided files (such as MS2 data requested from MS1-only
 #'   files) will return an empty (length zero) data.table. The data.tables
 #'   extracted from each of the individual files are collected into one large
-#'   table using data.table's `rbindlist`.
+#'   table using data.table's `rbindlist`. $metadata is a little weirder because
+#'   the metadata doesn't fit neatly into a tidy format but things are hopefully
+#'   named helpfully. $chroms was added in v1.3 and contains 7 columns:
+#'   chromatogram type (usually TIC, BPC or SRM info), chromatogram index,
+#'   target mz, product mz, retention time (rt), and intensity (int). $DAD was
+#'   also added in v1.3 and contains has three columns: retention time (rt),
+#'   wavelength (lambda),and intensity (int). Data requested that does not exist
+#'   in the provided files (such as MS2 data requested from MS1-only files) will
+#'   return an empty (zero-row) data.table.
 #'
 #' @export
 #'
@@ -63,7 +81,7 @@
 #' # Extract MS1 data from a couple files
 #' sample_dir <- system.file("extdata", package = "RaMS")
 #' sample_files <- list.files(sample_dir, full.names=TRUE)
-#' multifile_data <- grabMSdata(sample_files[2:4], grab_what="MS1")
+#' multifile_data <- grabMSdata(sample_files[c(3, 5, 6)], grab_what="MS1")
 #'
 #' # "Stream" data from the internet (i.e. Metabolights)
 #' \dontrun{
@@ -77,10 +95,71 @@
 #' file_data <- grabMSdata(sample_url, grab_what="everything", verbosity=2)
 #' }
 grabMSdata <- function(files, grab_what="everything", verbosity=NULL,
-                       mz=NULL, ppm=NULL, rtrange=NULL){
+                       mz=NULL, ppm=NULL, rtrange=NULL, prefilter=-1){
   # Check that files were provided
   if(!length(files)>0)stop("No files provided")
 
+  # Check that grab_what is one of the approved options
+  good_grabs <- c("MS1", "MS2", "EIC", "EIC_MS2", "everything", "metadata",
+                  "BPC", "TIC", "chroms", "DAD")
+  if(any(!grab_what%in%good_grabs)){
+    bad_grabs <- paste(grab_what[!grab_what%in%good_grabs], collapse = ", ")
+    stop(paste0("`grab_what = ", bad_grabs, "` is not currently supported"))
+  }
+
+  # Handle tmzMLs first
+  tmzml_check <- grepl("\\.tmzML", files)
+  if(any(tmzml_check)){
+    if(!all(tmzml_check)){
+      stop("At this time, tmzMLs can't be mixed with mzML/mzXMLs")
+    }
+    if(grab_what=="everything"){
+      grab_what <- c("MS1", "MS2")
+    }
+    if(!all(grab_what%in%c("MS1", "MS2"))){
+      stop("At this time, tmzMLs can only be used with MS1 or MS2 data")
+    }
+    if(!is.null(mz)){
+      warning("Argument 'mz' has no function when used with tmzML files, ignoring")
+    }
+    if(!is.null(ppm)){
+      warning("Argument 'ppm' has no function when used with tmzML files, ignoring")
+    }
+    if(!is.null(rtrange)){
+      warning("Argument 'rtrange' has no function when used with tmzML files, ignoring")
+    }
+    if(prefilter>-1){
+      warning("Argument 'prefilter' has no function when used with tmzML files, ignoring")
+    }
+
+    # Handle null verbosity flag with intelligent defaults
+    if(is.null(verbosity)){
+      verbosity <- ifelse(length(files)==1, 0, 1)
+    }
+
+    # Check for missing files before creating object
+    url_files <- grepl(x = files, "^(http|ftp)")
+    file_exists <- file.exists(files[!url_files])
+    if(!all(file_exists)){
+      stop(paste("Unable to find all files, e.g.\n",
+                 paste(head(files[!url_files][!file_exists]), collapse = "\n ")))
+    }
+
+    # Create a list object to hide connection values and allow
+    # RStudio to autocomplete MS1 and MS2
+    msdata_con <- vector("list", length = length(grab_what)+1)
+    msdata_con[[length(msdata_con)]] <- list(
+      files=files,
+      grab_what=grab_what,
+      verbosity=verbosity
+    )
+    names(msdata_con) <- c(grab_what, "connection")
+
+    class(msdata_con) <- "msdata_connection"
+    return(msdata_con)
+  }
+
+  # Handle mzMLs and mzXMLs below
   # Add sanity check for EIC extraction
   if(!is.null(mz) & !any(c("EIC", "EIC_MS2")%in%grab_what)){
     warning(paste0('Argument "mz" should be used with grab_what = "EIC" or',
@@ -91,28 +170,31 @@ grabMSdata <- function(files, grab_what="everything", verbosity=NULL,
                    '"EIC_MS2" and will be ignored in the current call'))
   }
 
-  # Define outer control loop so multiple files can be read in simultaneously
-  all_file_data <- list()
+  # Handle null verbosity flag with intelligent defaults
   if(is.null(verbosity)){
     verbosity <- ifelse(length(files)==1, 2, 1)
   }
+
+  # Define outer control loop so multiple files can be read in simultaneously
+  all_file_data <- list()
   if(verbosity>0){
-    if(length(files)>2){
+    if(length(files)>=2){
       pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     }
     start_time <- Sys.time()
   }
+
   for(i in seq_along(files)){
     filename <- files[i]
 
-    if(grepl("mzML", basename(filename), ignore.case = TRUE)){
+    if(grepl("\\.mzML", basename(filename), ignore.case = TRUE)){
       out_data <- grabMzmlData(filename = filename, grab_what = grab_what,
                                verbosity = verbosity, mz = mz, ppm = ppm,
-                               rtrange = rtrange)
-    } else if(grepl("mzXML", basename(filename), ignore.case = TRUE)){
+                               rtrange = rtrange, prefilter = prefilter)
+    } else if(grepl("\\.mzXML", basename(filename), ignore.case = TRUE)){
       out_data <- grabMzxmlData(filename = filename, grab_what = grab_what,
                                 verbosity = verbosity, mz = mz, ppm = ppm,
-                                rtrange = rtrange)
+                                rtrange = rtrange, prefilter = prefilter)
     } else {
       stop(paste("Unable to determine file type for", filename))
     }
@@ -126,16 +208,14 @@ grabMSdata <- function(files, grab_what="everything", verbosity=NULL,
     }, dt_i=out_data, fname_i=basename(filename), SIMPLIFY = FALSE)
     all_file_data[[i]] <- out_data_filenamed
     names(all_file_data)[[i]] <- basename(filename)
-    if(verbosity>0 & length(files)>2){
+    if(verbosity>0 & length(files)>=2){
       setTxtProgressBar(pb, i)
     }
   }
   if(verbosity>0){
-    if(length(files)>2){
+    if(length(files)>=2){
       close(pb)
     }
-    time_total <- round(difftime(Sys.time(), start_time), digits = 2)
-    cat("Total time:", time_total, units(time_total), "\n")
   }
 
   # Bind all the similar pieces together (e.g. stack MS1 from different files)
@@ -143,6 +223,11 @@ grabMSdata <- function(files, grab_what="everything", verbosity=NULL,
   invisible(checkOutputQuality(
     output_data = all_file_data_output, grab_what = grab_what
   ))
+
+  if(verbosity>0){
+    time_total <- round(difftime(Sys.time(), start_time), digits = 2)
+    cat("Total time:", time_total, units(time_total), "\n")
+  }
 
   all_file_data_output
 }
@@ -167,11 +252,11 @@ grabMSdata <- function(files, grab_what="everything", verbosity=NULL,
 
 checkOutputQuality <- function(output_data, grab_what){
   if("everything"%in%grab_what){
-    grab_what <- c("MS1", "MS2", "BPC", "TIC")
+    grab_what <- c("MS1", "MS2", "BPC", "TIC", "metadata")
   }
   missing_data <- !grab_what%in%names(output_data)
   if(any(missing_data)){
-    stop(paste("Not all data collected; missing",
+    warning(paste("Not all data collected; missing",
                   paste(grab_what[missing_data], collapse = ", ")))
   }
 
@@ -194,10 +279,15 @@ checkOutputQuality <- function(output_data, grab_what){
       proper_names <- c("rt", "mz", "int", "filename")
     } else if(nms=="MS2"){
       proper_names <- c("rt", "premz", "fragmz", "int", "voltage", "filename")
+    } else if (nms=="DAD"){
+      proper_names <- c("rt", "lambda", "int", "filename")
     } else if (nms=="EIC"){
       proper_names <- c("rt", "mz", "int", "filename")
     } else if (nms=="EIC_MS2"){
       proper_names <- c("rt", "premz", "fragmz", "int", "voltage", "filename")
+    } else if(nms=="chroms"){
+      proper_names <- c("chrom_type", "chrom_index", "target_mz", "product_mz",
+                        "rt", "int")
     } else if(nms=="metadata"){
       return(FALSE) # Because we don't know what names metadata may have
     } else {
@@ -230,6 +320,44 @@ checkOutputQuality <- function(output_data, grab_what){
   return(invisible(NULL))
 }
 
+# grabAccessionData ----
+#' Get arbitrary metadata from an mzML file by accession number
+#'
+#' @param filename The name of the file for which metadata is requested. Both
+#'   absolute and relative paths are acceptable.
+#' @param accession_number The HUPO-PSI accession number for the metadata to
+#' be extracted. These accession numbers are typically of the form MS:#######
+#' and the full list can be found and searched at
+#' https://raw.githubusercontent.com/HUPO-PSI/psi-ms-CV/master/psi-ms.obo.
+#'
+#' @return A data frame with the name and value of the parameter requested,
+#' as deduced from the XML tag attributes corresponding to the accession
+#' number.
+#' @export
+#'
+#' @examples
+#' library(RaMS)
+#' sample_dir <- system.file("extdata", package = "RaMS")
+#' sample_file <- list.files(sample_dir, full.names=TRUE)[3]
+#' # Get ion injection time
+#' iit_df <- grabAccessionData(sample_file, "MS:1000927")
+#' # Manually create TIC
+#' int_df <- grabAccessionData(sample_file, "MS:1000285")
+#' rt_df <- grabAccessionData(sample_file, "MS:1000016")
+#' tic <- data.frame(rt=rt_df$value, int=int_df$value)
+#' plot(tic$rt, tic$int, type = "l")
+grabAccessionData <- function(filename, accession_number){
+  xml_data <- xml2::read_xml(filename)
+  arb_xpath <- paste0('//d1:cvParam[@accession="', accession_number, '"]')
+  arb_nodes <- xml2::xml_find_all(xml_data, arb_xpath)
+  out_df <- data.frame(name=xml2::xml_attr(arb_nodes, "name"),
+                       value=xml2::xml_attr(arb_nodes, "value"))
+  if(nrow(out_df)==0){
+    warning(paste("Accession number", accession_number, "not found"))
+  }
+  out_df
+}
+
 # Other functions ----
 checkFileType <- function(xml_data, node_to_check){
   # Check for mzML node
@@ -243,7 +371,7 @@ checkProvidedMzPpm <- function(mz, ppm){
   if(is.null(mz)){
     stop("Please provide an m/z value when using grab_what = EIC")
   }
-  if(class(mz)!="numeric"&&class(mz)!="integer"){
+  if(!inherits(mz, "numeric")&&!inherits(mz, "integer")){
     stop("Please provide a numeric m/z value")
   }
   if(any(is.na(mz))){
@@ -256,12 +384,44 @@ checkProvidedMzPpm <- function(mz, ppm){
   if(is.null(ppm)){
     stop("Please provide a ppm value when using grab_what = EIC")
   }
-  if(class(ppm)!="numeric"&&class(ppm)!="integer"){
+  if(!inherits(ppm, "numeric")&&!inherits(ppm, "integer")){
     stop("Please provide a numeric ppm value")
   }
   if(ppm<0){
     stop("ppm must be positive")
   }
+}
+
+checkRTrange <- function(rtrange){
+  if(!is.null(rtrange)){
+    if("matrix"%in%class(rtrange)){
+      rtrange <- as.vector(rtrange)
+    }
+    if(length(rtrange)!=2){
+      stop("Please provide an rtrange of length 2")
+    }
+    if(!inherits(rtrange, "numeric")&&!inherits(rtrange, "integer")){
+      stop("Please provide a numeric rtrange")
+    }
+  }
+  rtrange
+}
+
+checkProvidedPrefilter <- function(prefilter){
+  if(!is.numeric(prefilter)){
+    warning(paste0("`prefilter` argument should be numeric, but instead it ",
+                   "seems to be ", class(prefilter), " with value ",
+                   prefilter, ". Replacing with -1..."))
+
+    prefilter <- -1
+  }
+  if(length(prefilter)>1){
+    warning(paste0("`prefilter` argument should be length 1, but instead it ",
+                   "seems to be ", length(prefilter), ". Ignoring all extra ",
+                   "values..."))
+    prefilter <- prefilter[1]
+  }
+  prefilter
 }
 
 
@@ -294,26 +454,15 @@ timeReport <- function(last_time, text=NULL){
   Sys.time()
 }
 
-checkRTrange <- function(rtrange){
-  if(!is.null(rtrange)){
-    if("matrix"%in%class(rtrange)){
-      rtrange <- as.vector(rtrange)
-    }
-    if(length(rtrange)!=2){
-      stop("Please provide an rtrange of length 2")
-    }
-    if(class(rtrange)!="numeric"&&class(rtrange)!="integer"){
-      stop("Please provide a numeric rtrange")
-    }
-  }
-  rtrange
-}
-
 
 # Import area ----
 
-#' @import utils
 #' @import xml2
 #' @import data.table
+#' @import utils
 #' @importFrom base64enc base64decode
+#' @export
+data.table::between
+#' @export
+data.table::`%between%`
 NULL

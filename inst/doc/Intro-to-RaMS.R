@@ -18,7 +18,7 @@ library(RaMS)
 msdata_dir <- system.file("extdata", package = "RaMS")
 
 # Identify the files of interest
-data_files <- list.files(msdata_dir, pattern = "mzML", full.names = TRUE)
+data_files <- list.files(msdata_dir, pattern = "mzML", full.names = TRUE)[1:4]
 
 # Check that the files identified are the ones expected
 basename(data_files)
@@ -73,7 +73,7 @@ adenine_mz <- 136.06232
 
 adenine_data <- msdata$MS1[mz%between%pmppm(adenine_mz, ppm=5)]
 
-ggplot(adenine_data) + geom_line(aes(x=rt, y=int, color=filename))
+ggplot(adenine_data) + geom_line(aes(x=rt, y=int, color=filename)) + lims(x=c(4, 9))
 
 ## ----multicmpdplot------------------------------------------------------------
 mzs_of_interest <- c(adenine=136.06232, valine=118.0865, homarine=138.055503)
@@ -84,7 +84,8 @@ mass_data <- imap_dfr(mzs_of_interest, function(mz_i, name){
 
 ggplot(mass_data) + 
   geom_line(aes(x=rt, y=int, color=filename)) + 
-  facet_wrap(~name, ncol = 1, scales = "free_y")
+  facet_wrap(~name, ncol = 1, scales = "free_y") +
+  lims(x=c(4, 9))
 
 ## ----MS2data------------------------------------------------------------------
 msdata <- grabMSdata(data_files[1], grab_what = "everything")
@@ -99,7 +100,7 @@ homarine_MS2$int <- homarine_MS2$int/max(homarine_MS2$int)
 ggplot(homarine_MS2) +
   geom_point(aes(x=fragmz, y=int)) +
   geom_segment(aes(x=fragmz, xend=fragmz, y=int, yend=0)) +
-  scale_y_continuous(breaks = c(0, 50, 100), labels = c("0%", "50%", "100%"))
+  scale_y_continuous(breaks = c(0, .5, 1), labels = c("0%", "50%", "100%")) +
   labs(x="Fragment m/z", y="")
 
 ## ----plotly, eval=FALSE-------------------------------------------------------
@@ -141,6 +142,16 @@ msdata$MS2 <- mutate(msdata$MS2, neutral_loss=premz-fragmz) %>%
 msdata$MS2[neutral_loss%between%pmppm(homarine_neutral_loss, ppm = 5)] %>%
   arrange(desc(int)) %>% head() %>% knitr::kable()
 
+## ---- fig.height=3------------------------------------------------------------
+chrom_file <- system.file("extdata", "wk_chrom.mzML.gz", package = "RaMS")
+msdata_chroms <- grabMSdata(chrom_file, verbosity = 0, grab_what = "chroms")
+given_chrom <- msdata_chroms$chroms[chrom_type=="SRM iletter1"]
+ptitle <- with(given_chrom, paste0(
+  unique(chrom_type), ": Target m/z = ", unique(target_mz), "; Product m/z = ", 
+  unique(product_mz)
+))
+plot(given_chrom$rt, given_chrom$int, type="l", main=ptitle)
+
 ## ----EICdemo------------------------------------------------------------------
 all_data <- grabMSdata(data_files, grab_what = c("MS1", "MS2"))
 
@@ -152,18 +163,18 @@ all_data$MS1 %>%
   mutate(type="All data") %>%
   rbind(small_data$EIC %>% mutate(type="Extracted data only")) %>%
   filter(!str_detect(filename, "DDA")) %>%
+  filter(rt%between%c(5, 15)) %>%
   group_by(rt, filename, type) %>%
   summarise(TIC=sum(int), .groups="drop") %>%
   ggplot() +
   geom_line(aes(x=rt, y=TIC, color=filename)) +
-  facet_wrap(~type, ncol = 1) +
-  theme(legend.position = "top")
+  facet_wrap(~type, ncol = 1)
 
 # Size reduction factor:
 as.numeric(object.size(all_data)/object.size(small_data))
 
 ## ----rtrangedemo--------------------------------------------------------------
-small_data <- grabMSdata(data_files, grab_what = c("MS1", "MS2"), rtrange = c(5.5, 7))
+small_data <- grabMSdata(data_files, grab_what = c("MS1", "MS2"), rtrange = c(6, 8))
 
 all_data$MS1 %>%
   mutate(type="All data") %>%
@@ -173,8 +184,7 @@ all_data$MS1 %>%
   summarise(TIC=sum(int), .groups="drop") %>%
   ggplot() +
   geom_line(aes(x=rt, y=TIC, color=filename)) +
-  facet_wrap(~type, ncol = 1) +
-  theme(legend.position = "top")
+  facet_wrap(~type, ncol = 1)
 
 # Size reduction factor:
 as.numeric(object.size(all_data)/object.size(small_data))

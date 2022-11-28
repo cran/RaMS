@@ -7,15 +7,12 @@ R-based access to Mass-Spec data (RaMS)
 [![R build
 status](https://github.com/wkumler/RaMS/workflows/R-CMD-check/badge.svg)](https://github.com/wkumler/RaMS/actions/)
 [![Codecov test
-coverage](https://codecov.io/gh/wkumler/RaMS/branch/master/graph/badge.svg)](https://codecov.io/gh/wkumler/RaMS)
+coverage](https://codecov.io/gh/wkumler/RaMS/branch/master/graph/badge.svg?token=FU9R6TAOOO)](https://app.codecov.io/gh/wkumler/RaMS)
 <!-- badges: end -->
 
-**Table of contents:**
-[Overview](https://github.com/wkumler/RaMS#overview) -
-[Installation](https://github.com/wkumler/RaMS#installation) -
-[Usage](https://github.com/wkumler/RaMS#usage) - [File
-types](https://github.com/wkumler/RaMS#file-types) -
-[Contact](https://github.com/wkumler/RaMS#contact)
+**Table of contents:** [Overview](.#overview) -
+[Installation](.#installation) - [Usage](.#usage) - [File
+types](.#file-types) - [Contact](.#contact)
 
 ## Overview
 
@@ -33,6 +30,9 @@ data](https://r4ds.had.co.nz/tidy-data.html). Tidy data neatly resolves
 the ragged arrays that mass spectrometers produce and plays nicely with
 other [tidy data packages](https://www.tidyverse.org/).
 
+![RaMS quick-start poster from Metabolomics Society conference
+2021](poster.png)
+
 ## Installation
 
 To install the stable version on CRAN:
@@ -44,7 +44,7 @@ install.packages('RaMS')
 To install the current development version:
 
 ``` r
-devtools::install_github("wkumler/RaMS")
+devtools::install_github("wkumler/RaMS", build_vignettes = TRUE)
 ```
 
 Finally, load RaMS like every other package:
@@ -68,6 +68,10 @@ msdata_files <- list.files(msdata_dir, pattern = "mzML", full.names=TRUE)
 msdata <- grabMSdata(files = msdata_files[2:4], grab_what = c("BPC", "MS1"))
 ```
 
+Some additional examples can be found below, but a more thorough
+introduction can be found in [the
+vignette](https://htmlpreview.github.io/?https://github.com/wkumler/RaMS/blob/master/doc/Intro-to-RaMS.html).
+
 #### BPC/TIC data:
 
 Base peak chromatograms (BPCs) and total ion chromatograms (TICs) have
@@ -79,14 +83,14 @@ library:
 knitr::kable(head(msdata$BPC, 3))
 ```
 
-|       rt |      int | filename           |
-|---------:|---------:|:-------------------|
-| 4.009000 | 11141859 | LB12HL\_AB.mzML.gz |
-| 4.024533 |  9982309 | LB12HL\_AB.mzML.gz |
-| 4.040133 | 10653922 | LB12HL\_AB.mzML.gz |
+|       rt |      int | filename          |
+|---------:|---------:|:------------------|
+| 4.009000 | 11141859 | LB12HL_AB.mzML.gz |
+| 4.024533 |  9982309 | LB12HL_AB.mzML.gz |
+| 4.040133 | 10653922 | LB12HL_AB.mzML.gz |
 
 ``` r
-plot(msdata$BPC$rt, msdata$BPC$int, type = "l")
+plot(msdata$BPC$rt, msdata$BPC$int, type = "l", ylab="Intensity")
 ```
 
 ![](man/figures/README-showbaseplot-1.png)<!-- -->
@@ -110,16 +114,18 @@ ion measured, and has multiple entries per retention time:
 knitr::kable(head(msdata$MS1, 3))
 ```
 
-|    rt |       mz |        int | filename           |
-|------:|---------:|-----------:|:-------------------|
-| 4.009 | 104.0710 | 1297755.00 | LB12HL\_AB.mzML.gz |
-| 4.009 | 104.1075 |  140668.12 | LB12HL\_AB.mzML.gz |
-| 4.009 | 112.0509 |   67452.86 | LB12HL\_AB.mzML.gz |
+|    rt |       mz |        int | filename          |
+|------:|---------:|-----------:|:------------------|
+| 4.009 | 139.0503 | 1800550.12 | LB12HL_AB.mzML.gz |
+| 4.009 | 148.0967 |  206310.81 | LB12HL_AB.mzML.gz |
+| 4.009 | 136.0618 |   71907.15 | LB12HL_AB.mzML.gz |
 
 This tidy format means that it plays nicely with other tidy data
-packages. Here, we use \[data.table\] and a few other tidyverse packages
-to compare a molecule’s <sup>13</sup>C and <sup>15</sup>N peak areas to
-that of the base peak, giving us some clue as to its molecular formula.
+packages. Here, we use
+[data.table](https://cran.r-project.org/package=data.table) and a few
+other tidyverse packages to compare a molecule’s <sup>13</sup>C and
+<sup>15</sup>N peak areas to that of the base peak, giving us some clue
+as to its molecular formula.
 
 ``` r
 library(data.table)
@@ -148,10 +154,10 @@ iso_data %>%
   knitr::kable()
 ```
 
-| isotope | avg\_ratio | sd\_ratio |
-|:--------|-----------:|----------:|
-| 13C     |  0.0543929 | 0.0006015 |
-| 15N     |  0.0033375 | 0.0001846 |
+| isotope | avg_ratio |  sd_ratio |
+|:--------|----------:|----------:|
+| 13C     | 0.0543929 | 0.0006015 |
+| 15N     | 0.0033375 | 0.0001846 |
 
 With [natural
 abundances](https://en.wikipedia.org/wiki/Natural_abundance) for
@@ -189,29 +195,43 @@ msdata$MS2[premz%between%pmppm(118.0865) & int>mean(int)] %>%
 
 ![](man/figures/README-plotfragdata-1.png)<!-- -->
 
-Or want to search for a specific neutral loss:
+Or want to search for precursors with a specific neutral loss:
 
 ``` r
 msdata$MS2[, neutral_loss:=premz-fragmz] %>%
   filter(neutral_loss%between%pmppm(60.02064, 5)) %>%
-  head() %>% knitr::kable()
+  head(3) %>% knitr::kable()
 ```
 
-|       rt |    premz |    fragmz |        int | voltage | filename          | neutral\_loss |
-|---------:|---------:|----------:|-----------:|--------:|:------------------|--------------:|
-| 4.182333 | 118.0864 |  58.06590 | 390179.500 |      35 | DDApos\_2.mzML.gz |      60.02055 |
-| 4.276100 | 116.0709 |  56.05036 |   1093.988 |      35 | DDApos\_2.mzML.gz |      60.02050 |
-| 4.521367 | 118.0864 |  58.06589 | 343084.000 |      35 | DDApos\_2.mzML.gz |      60.02056 |
-| 4.649867 | 170.0810 | 110.06034 |   4792.479 |      35 | DDApos\_2.mzML.gz |      60.02070 |
-| 4.857983 | 118.0865 |  58.06590 | 314075.312 |      35 | DDApos\_2.mzML.gz |      60.02057 |
-| 5.195617 | 118.0865 |  58.06590 | 282611.688 |      35 | DDApos\_2.mzML.gz |      60.02057 |
+|       rt |    premz |   fragmz |        int | voltage | filename         | neutral_loss |
+|---------:|---------:|---------:|-----------:|--------:|:-----------------|-------------:|
+| 4.182333 | 118.0864 | 58.06590 | 390179.500 |      35 | DDApos_2.mzML.gz |     60.02055 |
+| 4.276100 | 116.0709 | 56.05036 |   1093.988 |      35 | DDApos_2.mzML.gz |     60.02050 |
+| 4.521367 | 118.0864 | 58.06589 | 343084.000 |      35 | DDApos_2.mzML.gz |     60.02056 |
+
+#### Minifying MS files
+
+As of version 1.1.0, `RaMS` also has functions that allow irrelevant
+data to be removed from the file to reduce file sizes. See the
+[vignette](https://htmlpreview.github.io/?https://github.com/wkumler/RaMS/blob/master/doc/Minifying-files-with-RaMS.html)
+for more details.
+
+#### tmzML documents
+
+Version 1.2.0 of RaMS introduced a new file type, the “transposed mzML”
+or “tmzML” file to resolve the large memory requirement when working
+with many files. See [the
+vignette](https://htmlpreview.github.io/?https://github.com/wkumler/RaMS/blob/master/doc/Intro-to-tmzML.html)
+for more details.
 
 ## File types
 
 RaMS is currently limited to the modern **mzML** data format and the
-slightly older **mzXML** format. Tools to convert data from other
-formats are available through
-[Proteowizard](http://proteowizard.sourceforge.net/tools.shtml)’s
+slightly older **mzXML** format, as well as the custom [**tmzML**
+format](https://htmlpreview.github.io/?https://github.com/wkumler/RaMS/blob/master/doc/Intro-to-tmzML.html)
+as of version 1.2.0. Tools to convert data from other formats are
+available through
+[Proteowizard’s](https://proteowizard.sourceforge.io/tools/msconvert.html)
 `msconvert` tool. Data can, however, be gzip compressed (file ending
 .gz) and this compression actually speeds up data retrieval
 significantly as well as reducing file sizes.
@@ -245,4 +265,4 @@ Issues page](https://github.com/wkumler/RaMS/issues).
 
 ------------------------------------------------------------------------
 
-README last built on 2021-03-17
+README last built on 2022-11-16

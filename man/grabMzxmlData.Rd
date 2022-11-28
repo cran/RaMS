@@ -10,7 +10,8 @@ grabMzxmlData(
   verbosity = 0,
   rtrange = NULL,
   mz = NULL,
-  ppm = NULL
+  ppm = NULL,
+  prefilter = -1
 )
 }
 \arguments{
@@ -20,12 +21,16 @@ relative paths are acceptable.}
 \item{grab_what}{What data should be read from the file? Options include
 "MS1" for data only from the first spectrometer, "MS2" for fragmentation
 data, "BPC" for rapid access to the base peak chromatogram, and "TIC" for
-rapid access to the total ion chromatogram. These options can be combined
-(i.e. `grab_data=c("MS1", "MS2", "BPC")`) or this argument can be set to
-"everything" to extract all of the above. Option "EIC" is useful when
-working with files whose total size exceeds working memory - it first
-extracts all relevant MS1 and MS2 data, then discards data outside of the
-mass range(s) calculated from the provided mz and ppm.}
+rapid access to the total ion chromatogram. DAD and chromatogram ("DAD" and
+"chroms") are unavailable for mzXML files. Metadata can be accessed with
+"metadata", which provides information about the instrument and time the
+file was run. These options can be combined (i.e. `grab_data=c("MS1",
+"MS2", "BPC")`) or this argument can be set to "everything" to extract all
+of the above. Options "EIC" and "EIC_MS2" are useful when working with
+files whose total size exceeds working memory - it first extracts all
+relevant MS1 and MS2 data, respectively, then discards data outside of the
+mass range(s) calculated from the provided mz and ppm. The default,
+"everything", includes all MS1, MS2, BPC, TIC, and metadata.}
 
 \item{verbosity}{Three levels of processing output to the R console are
 available, with increasing verbosity corresponding to higher integers. A
@@ -44,16 +49,28 @@ masses can be provided.}
 \item{ppm}{A single number corresponding to the mass accuracy (in parts per
 million) of the instrument on which the data was collected. Only used when
 combined with `grab_what = "EIC"` (see above).}
+
+\item{prefilter}{A single number corresponding to the minimum intensity of
+interest in the MS1 data. Data points with intensities below this threshold
+will be silently dropped, which can dramatically reduce the size of the
+final object. Currently only works with MS1 data, but could be expanded
+easily to handle more.}
 }
 \value{
 A list of `data.table`s, each named after the arguments requested in
-  grab_what. $MS1 contains MS1 information, $MS2 contains fragmentation info,
-  etc. MS1 data has three columns: retention time (rt), mass-to-charge (mz),
-  and intensity (int). MS2 data has five: retention time (rt), precursor m/z
-  (premz), fragment m/z (fragmz), fragment intensity (int), and collision
-  energy (voltage). Data requested that does not exist in the provided files
-  (such as MS2 data requested from MS1-only files) will return an empty
-  (length zero) data.table.
+  grab_what. E.g. $MS1 contains MS1 information, $MS2 contains fragmentation
+  info, etc. MS1 data has four columns: retention time (rt), mass-to-charge
+  (mz), intensity (int), and filename. MS2 data has six: retention time (rt),
+  precursor m/z (premz), fragment m/z (fragmz), fragment intensity (int),
+  collision energy (voltage), and filename. Data requested that does not
+  exist in the provided files (such as MS2 data requested from MS1-only
+  files) will return an empty (length zero) data.table. The data.tables
+  extracted from each of the individual files are collected into one large
+  table using data.table's `rbindlist`. $metadata is a little weirder because
+  the metadata doesn't fit neatly into a tidy format but things are hopefully
+  named helpfully. Data requested that does not exist in the provided files
+  (such as DAD or chromatogram data) will return an empty (zero-row)
+  data.table.
 }
 \description{
 This function handles the mzXML side of things, reading in files that are
@@ -66,6 +83,7 @@ additional filtering) is desired before the full data object is returned.
 \examples{
 sample_file <- system.file("extdata", "LB12HL_AB.mzXML.gz", package = "RaMS")
 file_data <- grabMzxmlData(sample_file, grab_what="MS1")
+\dontrun{
 # Extract MS1 data and a base peak chromatogram
 file_data <- grabMzxmlData(sample_file, grab_what=c("MS1", "BPC"))
 # Extract EIC for a specific mass
@@ -77,5 +95,6 @@ file_data <- grabMzxmlData(sample_file, grab_what="EIC", ppm=5,
 # Extract MS2 data
 sample_file <- system.file("extdata", "DDApos_2.mzXML.gz", package = "RaMS")
 MS2_data <- grabMzxmlData(sample_file, grab_what="MS2")
+}
 
 }
