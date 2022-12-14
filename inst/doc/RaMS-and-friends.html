@@ -368,13 +368,13 @@ files can overwhelm common file readers.</p>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Grab the MS data</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(single_file, <span class="at">grab_what =</span> <span class="st">&quot;everything&quot;</span>)</span></code></pre></div>
 <pre><code>## 
-## Reading file LB12HL_AB.mzML.gz... 0.12 secs 
+## Reading file LB12HL_AB.mzML.gz... 0.11 secs 
 ## Reading MS1 data...0.1 secs 
 ## Reading MS2 data...0.01 secs 
-## Reading BPC...0.06 secs 
-## Reading TIC...0.07 secs 
-## Reading file metadata...0.12 secs 
-## Total time: 0.49 secs</code></pre>
+## Reading BPC...0.05 secs 
+## Reading TIC...0.06 secs 
+## Reading file metadata...0.09 secs 
+## Total time: 0.42 secs</code></pre>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Write out MS1 data to .csv file</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="at">x =</span> msdata<span class="sc">$</span>MS1, <span class="at">file =</span> <span class="st">&quot;MS1_data.csv&quot;</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -399,10 +399,10 @@ functionality.</p>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Grab the MS1 and MS2 data</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(MS2_file, <span class="at">grab_what=</span><span class="fu">c</span>(<span class="st">&quot;MS1&quot;</span>, <span class="st">&quot;MS2&quot;</span>))</span></code></pre></div>
 <pre><code>## 
-## Reading file DDApos_2.mzML.gz... 0.42 secs 
-## Reading MS1 data...0.4 secs 
-## Reading MS2 data...0.14 secs 
-## Total time: 0.96 secs</code></pre>
+## Reading file DDApos_2.mzML.gz... 0.37 secs 
+## Reading MS1 data...0.32 secs 
+## Reading MS2 data...0.1 secs 
+## Total time: 0.79 secs</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Write out MS data to Excel file</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># openxlsx writes each object in a list to a unique sheet</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Produces one sheet for MS1 and one for MS2</span></span>
@@ -432,7 +432,7 @@ functionality.</p>
   |===================================                                   |  50%
   |                                                                            
   |======================================================================| 100%
-## Total time: 1.2 secs</code></pre>
+## Total time: 1.11 secs</code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the sqlite database and connect to it</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>MSdb <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">&quot;MSdata.sqlite&quot;</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -456,13 +456,13 @@ functionality.</p>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>extra_file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;LB12HL_EF.mzML.gz&quot;</span>, <span class="at">package =</span> <span class="st">&quot;RaMS&quot;</span>)</span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>extra_msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(extra_file, <span class="at">grab_what =</span> <span class="st">&quot;everything&quot;</span>)</span></code></pre></div>
 <pre><code>## 
-## Reading file LB12HL_EF.mzML.gz... 0.12 secs 
-## Reading MS1 data...0.1 secs 
+## Reading file LB12HL_EF.mzML.gz... 0.11 secs 
+## Reading MS1 data...0.09 secs 
 ## Reading MS2 data...0.01 secs 
 ## Reading BPC...0.06 secs 
-## Reading TIC...0.07 secs 
-## Reading file metadata...0.16 secs 
-## Total time: 0.52 secs</code></pre>
+## Reading TIC...0.06 secs 
+## Reading file metadata...0.13 secs 
+## Total time: 0.45 secs</code></pre>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbGetQuery</span>(MSdb, <span class="st">&#39;SELECT COUNT(*) FROM MS1&#39;</span>) <span class="co"># Initial number of rows</span></span></code></pre></div>
 <pre><code>##   COUNT(*)
 ## 1    42313</code></pre>
@@ -506,7 +506,7 @@ Python code chunks as shown below.</p>
   |===============================================                       |  67%
   |                                                                            
   |======================================================================| 100%
-## Total time: 0.35 secs</code></pre>
+## Total time: 0.33 secs</code></pre>
 </div>
 <div id="python-code-chunk-python" class="section level3">
 <h3>Python code chunk: {python}</h3>
