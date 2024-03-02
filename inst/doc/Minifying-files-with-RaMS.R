@@ -69,7 +69,7 @@ unlink("mini_mzMLs", recursive = TRUE)
 #  # Include glycine betaine isotopes for README demo
 #  mzs_to_include <- c(mzs_to_include, 119.0899, 119.0835)
 
-## ----download the mzXMLs, eval=FALSE------------------------------------------
+## ----download from MBLs, eval=FALSE-------------------------------------------
 #  if(!dir.exists("vignettes/data"))dir.create("vignettes/data")
 #  base_url <- "ftp://ftp.ebi.ac.uk/pub/databases/metabolights/studies/public/MTBLS703/"
 #  chosen_files <- paste0(base_url, "170223_Smp_LB12HL_", c("AB", "CD", "EF"), "_pos.mzXML")
@@ -78,12 +78,12 @@ unlink("mini_mzMLs", recursive = TRUE)
 #  mapply(download.file, chosen_files, paste0("vignettes/data/", new_names),
 #         mode = "wb", method = "libcurl")
 
-## ----get DDA, eval=FALSE------------------------------------------------------
-#  file.copy(from = paste0("Z:/1_QEdata/2016/2016_Katherine_1335_LightB12_",
-#                          "Experiment/170223_KRH_Rerun_1335_LightB12_Exp_HILIC/",
-#                          "positive/",
-#                          "170223_Poo_AllCyanoAqExtracts_DDApos_2.mzXML"),
-#            to = "vignettes/data/DDApos_2.mzXML", overwrite = TRUE)
+## ----download from MW, eval=FALSE---------------------------------------------
+#  MW_url <- paste0(
+#    "https://www.metabolomicsworkbench.org/data/file_extract_7z.php?",
+#    "A=ST002830_rawdata.zip&F=TCR_081023_Fu_WorkBench%252FS30657.mzXML"
+#  )
+#  download.file(MW_url, destfile = "vignettes/data/S30657.mzXML")
 
 ## ----minify, warning=FALSE, eval=FALSE----------------------------------------
 #  library(RaMS)

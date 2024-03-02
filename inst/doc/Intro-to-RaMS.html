@@ -385,8 +385,10 @@ vignette</a>.</p>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># Check that the files identified are the ones expected</span></span>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">basename</span>(data_files)</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; [1] &quot;DDApos_2.mzML.gz&quot;  &quot;LB12HL_AB.mzML.gz&quot; &quot;LB12HL_CD.mzML.gz&quot;</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; [4] &quot;LB12HL_EF.mzML.gz&quot;</span></span></code></pre></div>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Blank_129I_1L_pos_20240207-MS3.mzML.gz&quot;</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; [2] &quot;LB12HL_AB.mzML.gz&quot;                     </span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; [3] &quot;LB12HL_CD.mzML.gz&quot;                     </span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; [4] &quot;LB12HL_EF.mzML.gz&quot;</span></span></code></pre></div>
 <p>There’s only one function to worry about in <code>RaMS</code>: the
 aptly named <code>grabMSdata</code>. This function has a couple
 arguments with sensible defaults, but you’ll always need to tell it two
@@ -405,9 +407,9 @@ plot:</p>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(single_file, <span class="at">grab_what =</span> <span class="st">&quot;TIC&quot;</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_AB.mzML.gz... 0.05 secs </span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; Reading TIC...0.09 secs </span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; Reading TIC...0.1 secs </span></span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; Binding files together into single data.table</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; Total time: 0.15 secs</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; Total time: 0.16 secs</span></span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(msdata<span class="sc">$</span>TIC, <span class="dv">3</span>))</span></code></pre></div>
 <table>
@@ -448,10 +450,10 @@ also collected by the mass analyzer and doesn’t need to be
 calculated.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(single_file, <span class="at">grab_what =</span> <span class="st">&quot;BPC&quot;</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_AB.mzML.gz... 0.05 secs </span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; Reading BPC...0.08 secs </span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_AB.mzML.gz... 0.04 secs </span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; Reading BPC...0.06 secs </span></span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; Binding files together into single data.table</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; Total time: 0.12 secs</span></span></code></pre></div>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; Total time: 0.1 secs</span></span></code></pre></div>
 <p>Since the data is parsed in a <a href="https://r4ds.had.co.nz/tidy-data.html">“tidy” format</a>, it plays
 nicely with popular packages such as <code>ggplot2</code>. Let’s use
 that to plot our BPC instead of the base R plotting system:</p>
@@ -474,7 +476,7 @@ than one file is loaded; this can be disabled by setting the
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="er">|===============================================</span>                       <span class="er">|</span>  <span class="dv">67</span>%</span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Total time: 0.34 secs</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Total time: 0.31 secs</span></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="fu">ggplot</span>(msdata<span class="sc">$</span>BPC) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>rt, <span class="at">y=</span>int, <span class="at">color=</span>filename))</span></code></pre></div>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnAAAAEgCAMAAAADq777AAABBVBMVEUAAAAAADoAAGYAOmYAOpAAZpAAZrYAujgzMzM6AAA6ADo6AGY6OpA6ZmY6ZpA6ZrY6kNtNTU1NTW5NTY5NbqtNjshhnP9mAABmADpmAGZmOjpmOpBmZjpmZmZmZrZmtv9uTU1uTW5uTY5ubqtuq8huq+SOTU2OTW6OTY6ObquOyP+QOgCQOjqQOmaQZpCQkDqQkGaQtpCQ27aQ2/+rbk2rbm6rbo6rjk2ryKur5P+2ZgC2Zjq2tma225C22/+2/9u2///Ijk3I///bkDrbkGbb/7bb///kq27k///r6+vy8vL4dm3/tmb/yI7/25D/27b/29v/5Kv//7b//8j//9v//+T///9oubtwAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAS30lEQVR4nO2dCXfcthVGx64rxnYXKUnpNG0qp47dVE7aOHLSRG0aL62dKaVpJUv8/z+lxMIdAEESeAOC3z3HmhnyEcMDXIMgh+Db5AAQstn3DoB1AeEAKRAOkALhACkQDpAC4QApboXbmhlaPznYW8Fh7EUv1mmj0QLhFrAXEE5HMC0S115AOB3BtEhcewHhdATTInHtBYTTEUyLxLUXEE5HMC0S115AOB3BtEhcewHhdATTInHtBYTTEUyLxLUXEE5HMC0S115AOB3OWySb2CJ7CYZwFkA4d8EQzgII5y4YwllgFO7yj6/467snRx/+1F0pF14+PPrgVbnMeYtAOGWscw3oMAl3IVW6eX6Sv/1NZ6Vc+O5J8VLZ6LpFEginjPWiAg0G4V6+/53o4d59/op3dkWfxg1kn8uFl49+yt/96Xu5iesWgXDqWP9eeMPmkFpK9fKx6Oi4cHJhLdx7Ba73Lslclwj2jI1wFx9yqZhXhWsXR4zH5UJ2SH0fPRxtwd618MeIHq44oh4dMbeaPRw7afjsGwhHW7B3LfxhI5wcrnHPys/VwK78zHHdIhBOHetRCN/YCHfzXAzeijHcRXVCKheyTq4+g3XdIoVwVspBuMUwKJw8PWWiFS/VaK26DlcM6eprdK5bBMKpYz0K4Zuwf2mAcOpYp41GS+DCpRBOFeu00WiBcO6CIZwFEM5dMISzYO3CpQ5LhnAWBC1cWghndSkOwi0GCOeuZAhnQejCpRAOwulx3CIUwg0YB+EcA+HclQzhLAhZuIQLl0xpEdvgFMIRswDhLIyDcIth7cIlEI6W4IWzOqZCuMWwduGGrotAOMeELFwK4TSxThuNFghnLh7COQbCQThSwhduwIgpBddAOGogHIQjJeRcW1K41OdX5GnisXjQYwE93NANHeMLrkEPR03wwg3+vD6h4BoIRw2Eg3CkQDgIR0rYwqUQThnrtNFoWYJww9dFINxiCFy4ZOtVuKJoCEcLhINwpEA4CEcKhINwpIQt3BbCKWOdNhotAQuXQThdrNNGoyVw4bYQThXrtNFoCVo47oJX4bYQjpjVCzcwqQHCOQbCQThSIByEIyV84bZDc5VHF1y/hXDkrF64DMKRAuEgHCkQDsKRErBw1dmCR+GyDMLRohfuLc+LelK+rRPbS7znvKcRDicNtJh7OJk88OVJf1WZ855lE/ST8756yAOE6y1YLkbhZDL7G5mAV5vz3k++1DSDcJpYr0r4xSicTITKU0Gf5Mqc93UP5zznfSGcfOO02PZX+CwdKDAJJzu4/PLT71kvp8x5Xw7lBE67gLqHG3yQ+fQeDhd+iTEJV6d/ztk4Tpnznsl48YGnQ6p8N3xdBMItBpNwxSG08eFEmfO+7OgETlsEwmljPclAgUG48lyB93Q3375S5rz32cOV77wJx7OOQDhSDMKJjovlvH8rD6WanPf1QqctQiWc8WYUCOeYkH9pKN9BuN6C5QLhIhLu9ebWs3unu3unThvVLRAuHuGuHhyzFwg3sUUgnDZWXfvSNAg3sUUgnDZWWfm7u5vNwU4cUq+fbja3XxTuPSsWHot1m0P5+XAnFsogWiBcNMLxrk0Id/30oBjR3Xmzu3vnTf769gt+sC1exeeNWFgGOTVgkCUIN/zrPYRj1MKds46rsGx395gv/t8bsVp8lgvLIKcGDBKucAmE08aqa78W7vWGc8iHc/zPefHx1mn9uRHk1IBBIFyUwskDZenW1YNb5aqGcNRHU064wqXKtw4KXoFw57dOqyX86MncOu/0cGUQLRAuRuGunxaGNQRjbu3udoQrg5waMAiEi1E4fsVDHEXF4rPi49fFSURTuDKIFggXj3CLAMJBOFIgHIQjZRnCDU1qgHCLAcKZ+08I55h1C7eFcNRAOAhHCoSLR7j/qHHawrMJN+d92nib+fqKLI9o6v0KhXPZBaCH08eqax/CzWqRhgeDd2BCOAaEm9UiEE4fq659CDerRSCcPlZd+xBuVoukmvezC24Ilw0WDuEcA+EgHCnBCtf6iRPCdRYogXBzKhnCGWLVtW8WbnefT0HlM1Q3x9USMUdVrCz+yqiKq49OW9t02d09KP6e3e5tqAPCrU04bpmYyHX7BReK3SWsE+78k8PmNj129371Jr/6uL+hDgi3RuGuvzjNz249K96e8w7qWCfc9Rdf/+5NvQ37+9Vmc3jOZheebdhM//u/L4z9pLXh1YPNzz4+5av7OwnhYhIu66Hp4X7xpl7CejmdcEXg2XFzGzZdnx1GSwd39/9xnP/rWWvDs0MxN0co2gHCxSSc9RjuTkO466eHcummNxR7fcj6wMY2TCL2j4/tirW7+z/8+vrLH5rCXf32hXDttWqO9ZqFE/dfrk043jU9Pa6WXD0oR2n9Ho7N6yotFNs0hWN93u7+j3/59x9aG7LFLER0iV0g3BqFK0Zt5Vv+pBGdcNyZcoR31hGO92LFqr9/dbhT9HDKA2rIwjWDIVxngRJ74fgBkb8VvumEe81Wnh80tmkIx4+YxSo24VoxhlMeUNvCySfpnE9/ZpjDSoZwhlh17Q8IxwdiB53rcOKJNo2zVBElNrn+kh9zP3omtynW18J9/YAt/CVXrd6QFVScpf78C7G6Lx2EW4twpOivytXCyac3qa+eWOKwkiGcIVZd++6Ekyet054DYX6ChKKHm4HDSoZwhlh17QfUw+nBSQOEI6UlXHX5b2ppDiu5LdzApAYIx1iccPwpw7NwWMkQzhCrrv3FCdcZw9WZ7ls5UUs857yHcIZYdVsuTjjx40VFleleprdv4zvnPYQzxKrbcnHCta/AVdkry9SotDnvIZwhVt2WixPu6sGmcdJQZrqvkj/T5rxPWx+8TL0vhOt905JZnHBtZKb7XCTolW7R5bxHD2eIVbfYwoXj8HFc2ZmR5ryHcIZYdWMtS7jiFLV9SOVw4eRwjTbnPYQzxKrbclnC9Sgz3Vfp7Wlz3kM4Q6y6xRYunMx0L09PmWikOe9bwg096wHCMczCTZsmeC7uLTdMFBw5U3AZv6VCuM4CJXbCjZom+JoNr87uvBG3YKpv7hg3U3AZwg39eg/hGPbC2U4TlHf5Pi3Xi4lbs2YKQjhz97ks4ZIemh7OcprgeZlwUM63kf7NmSkYqnBpAuH0seraHzGGs5wmeH7Q2ricCz1npuCqhduuUbgx0wSrmX6tHm7WTMFVCycutqxQONtpgp0x3Hl3LvSEmYIQbo3C2U4TVJ6lzpspCOFWI9z4aYJ5/zrc7JmCEG4twlGjuSoH4SBcn1nTBHPjTEEIZy58ncJ5BMJBOFKCFW4L4fSx6tqHcDMqGcKZYtW1D+FmVDKEM8Wqax/CzajkrnDmOzAhHAPCzahkCGeKVdc+hJtRydOFS7RR3WAItwcgHIQjJULhhoyDcPskOuESCLci4dyRdj5aP+uhEM76OzLldy2WFQrn7n81ejhTrLr2zcJNmSYogm+dilfVc/CjySYI4Uyx6tq3E27MNMHyk96maLIJQjhTrLr27YWznSbYFy7abILThRu8LhKxcGkPTQ9nOU1QIVys2QSnCpesWjjrMZzlNMEymL/y7irabIIQzhSrrv0Rh1TbaYKKQ2qk2QRnCDdkHISzzyZoEi6qbIJpAuEMseratxfOdpqgUbj52QTn46ySpwu3hXAa4SZME5RDu+NaVqfZBEMWziwRhBsWjhT9VTkIB+H6zJomaJ9NcD7OKhnCGWPVtR9QD6cHwkE4UiAchCNlMcIZT1MhHAPCTa9kCGeMddpotCxEuIELcVVsUv2xCIZwewDCQThSIByEIyVU4TIIZ4h12mi0QDgIRwqEg3CkGIS7fCgzQrM0b0dVxsASmdytiKpXOatkCuGqR61COEL0wrEsqCw5ZS6zpna4eX7C0lfWKcgZzip5qcINPmdiasGdBctFL9wFS2/PVROJyHmfxjuzZoJenhj6c+f5UmmFM5QN4RxjHsOJXM889/gJT9DL8vS2UpDXPdx7Bc52qzfT3nLqfdL4a/0dSWq3U9bfD/QYhWNZnwvYgbXo5ZhbhWsXR4zHZe5xOZQTOPtfPauHG+hnyuCqSNNz89HDOcYk3Lsnj+sPL094R8eyPzd7OE8pyNNucOjCZTx2cBL2+IKVsT6N8IzxLLV5rlAIVw7VmmO4sqMTOKvkicIlrZeBYAi3D/TC1b4xqW6+fcXGcBfV4ZMdbosRnZ8ejt3+tijhsiwTwlkbB+G6vOVjtZOiF2Nv+aH0CX+RyMHbxVFjoatKphXOdF1kpHDNrzZdbYFwbhhbcToUwhklagmX7VO4+rtTCKdiKcKZ+4umcEXbhyBcCuGUQDhz2dOFwyFVSXTCZfsRbgvh7IhQuC2EC5j4hNvuQbiM/8ubU3hSy122AcLpGFtxOiYKx4dwexSueesAhFMD4cxlQzjHLEc405Xf8IRLzcVCODeMrTgd04UTTW91ldixcNsMwlkQo3ADXRyE2yeBCpdBOFOs00ajJTLhspCE8zc7x2mj0QLhthCOktiE46/Uwslvzev7jdOhciGcE8ZWnA6VcCaJINxiiE+4dG/CNW7/hHA6IhQu3ZNwWwhnQaDC9YOthMvEjY8QLlziE45tDOGCJcyc96nlsg5JxsJSywnw9WR+i6KNyIKS+iV1Um6MLKaHs+kuih5OXOHfaw/HXlM3BetinTYaLWsWzqboacKVBUK4HnEKZzxrUAinv6hss8vVhOrqFcJpiUm4ZJulexWu6ukgnJblCDf8QIZxwiXehGs8eU6/zxDOBWMrTsd04cTmNsI1LDNcchkhXJJDuGGCFI4L0BduqB+SQ7ihswZC4QzHVAjngrEVpyHNFME2wlVXI+YKl3SCjdTCle8gnJb4hevJZCFcCuF8sRzhhof2SuH6j2wbFq4xa95il6sDab6FcINEJVzdzhAuVMIUThk8OLRvtHNWX4TtnbH2het6kdbfZS8cS0fXE05vHIRzwdiK0zBNuOqI2hIu7W02KFxalDRLOJtfzSCcC8ZWnAa1cIZjqkm4nqg2wlVLJgnX+EYI1yFy4djBbbxw2XaqcOI9hNOzKOG0xgnhGo1bNjl3x69w9U/3efmh+Y064yCcC8ZWnBrRXirhjK3XFk5OD2UGpIrgjnAtk7lwme0uQ7hRBClcpg5WnAA0C24JJ3J0iEWdjlElXLPctN5ytHDiU/M6IIRrE6RwmmAmnPqgmou1zTIyZpyQqqNpKVwzuiVc1lg9WzidcRDOBWMrTo1OOOaUSbh2GYVy9S8Pir3ohDfezxFOzoxtJEGCcC2WJVySZmmmcC7v/9SasiFfKVzW/LlBFNzu9hTCZZa7XF4KKWOzrnBq4yCcC8ZWnBqtcMy4gko60YOlEl1BIiKpfuNSCtc/ZdXvhShSvil9KxZI4cReJQPDuKG6aP73WYlwdSbUVk7UzuqhfKmsZTJZg7kQpDnCEc2TJtv6Xjapgr6pC3vSDkNJ1brxRQntLRpuZppNugUIy6vP2zTnC9h/B54npHlUTauvUPyEoRwmrE84mdS+9a6/ur2uWzE9MazQ1HJVZtHPbbNWtzHm+LTNM25J5wgsO8tOBsok3ybCnox9a8JVYp0lGyCyVyYe2yMx+7k8jnPlsqRkUi00WIdwMiFq450q530dxRhq6lFeeIrVBItuqjBJeQ2Fai8sYynM8IQhX+qjMvVu+U6V876OcprzHsSKXrg617N8p8x57ykj9NwuIK69WGkPp855/wjC0RdMooYfRozhlDnvoxnDhbwX6xBOJrVvvFPlvK+jGMG0SFx7sQ7h5BU2eXoqL7n1c94PXYfbT4vEtRcrEW4CwbRIXHsB4XQE0yJx7QWE0xFMi8S1FxBORzAtEtdeQDgKvP1sgYL3CYRbc8F7AMKtueA9AOHWXPAeCFc4ECUQDpAC4QApEA6QAuEAKYEKd/O8eWOKQy4finkZzstl9wQWhR+d+Cj47dGRn92mJ1DhXp40br1zyLsnJ/lbDwVfMB/Ync+Xn7r9f8ILZtURC2EKV91c7Jr2HfHOePn+d0VHdMFuRHXrhij45hsvvf1eCFO4y0d/83NI9SRcXt1m77xweQOs+2P1nghUuIcn3A3n8EOqD5WlcOyOe/cFs+N0LL1coML56ojYuP4zH00npxs9ce1bPUMpknFcmMK9+7Mv4XJPA0R5lupeCghHwktfh9TC4t5jUlzAj3wefOMFsxP2m29xWcQj5WNMnHNxpHgQlAOYF2/5MwkcS1deh/NzWZKeQIUDsQLhACkQDpAC4QApEA6QAuEAKRAu/+8/970HawLC7e6d7nsX1gSEg3CkrFq43f2/bhiH+96RFbFu4e4eoIcjZuXCHUM4YtYtHHMNwpEC4SAcKRAOwpEC4a4eHO97P9YEhMvPNgf73pEVsWrhAD0QDpAC4QApEA6QAuEAKRAOkALhACkQDpAC4QApEA6Q8n/RT6PkbiAMNwAAAABJRU5ErkJggg==" width="80%" style="display: block; margin: auto;" /></p>
@@ -501,19 +503,19 @@ the mzML filetype, so <code>RaMS</code> can’t extract it.</p>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># less-minified DDA file here</span></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">grabMSdata</span>(<span class="at">files =</span> data_files[<span class="dv">1</span>], <span class="at">grab_what =</span> <span class="st">&quot;metadata&quot;</span>)</span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; Reading file DDApos_2.mzML.gz... 0.15 secs </span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; Reading file metadata...0.37 secs </span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; Reading file Blank_129I_1L_pos_20240207-MS3.mzML.gz... 0.02 secs </span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; Reading file metadata...0.03 secs </span></span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; Binding files together into single data.table</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; Total time: 0.52 secs</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; Total time: 0.06 secs</span></span>
 <span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; $metadata</span></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt;                                   source_file  inst_data       config_data</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; 1: 170223_Poo_AllCyanoAqExtracts_DDApos_2.raw None found &lt;data.frame[1x3]&gt;</span></span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;    timestamp n_spectra n_chromatograms ms_levels mz_lowest mz_highest</span></span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 1:      &lt;NA&gt;      1994               0  MS1, MS2   50.0298    613.158</span></span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;    lambda_lowest lambda_highest rt_start   rt_end centroided polarity</span></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; 1:            NA             NA  4.00085 14.99712       TRUE positive</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt;            filename</span></span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; 1: DDApos_2.mzML.gz</span></span></code></pre></div>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt;                           source_file  inst_data       config_data timestamp</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; 1: Blank_129I_1L_pos_20240207-MS3.raw None found &lt;data.frame[1x3]&gt;      &lt;NA&gt;</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;    n_spectra n_chromatograms     ms_levels mz_lowest mz_highest lambda_lowest</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 1:       227               0 MS1, MS3, MS2         0   959.8531            NA</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;    lambda_highest rt_start   rt_end centroided polarity</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; 1:             NA 46.01383 48.98667       TRUE positive</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt;                                  filename</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; 1: Blank_129I_1L_pos_20240207-MS3.mzML.gz</span></span></code></pre></div>
 </div>
 <div id="adding-a-column-ms1-data" class="section level3">
 <h3>Adding a column: MS1 data</h3>
@@ -529,7 +531,7 @@ the mzML filetype, so <code>RaMS</code> can’t extract it.</p>
 <span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="er">|===============================================</span>                       <span class="er">|</span>  <span class="dv">67</span>%</span>
 <span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Total time: 0.73 secs</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Total time: 0.67 secs</span></span>
 <span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
 <span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(msdata<span class="sc">$</span>MS1, <span class="dv">3</span>))</span></code></pre></div>
 <table>
@@ -606,16 +608,24 @@ it with the “MS2” option for <code>grab_what</code>, although it’s often
 a good idea to grab the MS1 data alongside.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(data_files[<span class="dv">1</span>], <span class="at">grab_what =</span> <span class="st">&quot;everything&quot;</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Reading file DDApos_2.mzML.gz... 0.49 secs </span></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.31 secs </span></span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; Reading MS2 data...0.12 secs </span></span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; Reading BPC...0.18 secs </span></span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; Reading TIC...0.19 secs </span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; Reading file metadata...0.38 secs </span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Reading file Blank_129I_1L_pos_20240207-MS3.mzML.gz... 0.06 secs </span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.01 secs </span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; Reading MS2 data...0.01 secs </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; Reading BPC...0.01 secs </span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; Reading TIC...0.01 secs </span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; Reading file metadata...0.03 secs </span></span>
 <span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; Binding files together into single data.table</span></span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; Total time: 1.68 secs</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; Total time: 0.13 secs</span></span>
 <span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(msdata<span class="sc">$</span>MS2, <span class="dv">3</span>))</span></code></pre></div>
 <table>
+<colgroup>
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="11%" />
+<col width="9%" />
+<col width="46%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="right">rt</th>
@@ -628,28 +638,28 @@ a good idea to grab the MS1 data alongside.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">4.008767</td>
-<td align="right">104.071</td>
-<td align="right">54.06526</td>
-<td align="right">1067.209</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
+<td align="right">46.45483</td>
+<td align="right">351.0818</td>
+<td align="right">51.10470</td>
+<td align="right">106.65444</td>
+<td align="right">40</td>
+<td align="left">Blank_129I_1L_pos_20240207-MS3.mzML.gz</td>
 </tr>
 <tr class="even">
-<td align="right">4.008767</td>
-<td align="right">104.071</td>
-<td align="right">54.45449</td>
-<td align="right">1073.694</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
+<td align="right">46.45483</td>
+<td align="right">351.0818</td>
+<td align="right">52.49430</td>
+<td align="right">90.74608</td>
+<td align="right">40</td>
+<td align="left">Blank_129I_1L_pos_20240207-MS3.mzML.gz</td>
 </tr>
 <tr class="odd">
-<td align="right">4.008767</td>
-<td align="right">104.071</td>
-<td align="right">57.03421</td>
-<td align="right">2519.131</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
+<td align="right">46.45483</td>
+<td align="right">351.0818</td>
+<td align="right">54.45892</td>
+<td align="right">88.82258</td>
+<td align="right">40</td>
+<td align="left">Blank_129I_1L_pos_20240207-MS3.mzML.gz</td>
 </tr>
 </tbody>
 </table>
@@ -660,13 +670,15 @@ fragments obtained.</p>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>homarine_MS2 <span class="ot">&lt;-</span> msdata<span class="sc">$</span>MS2[premz<span class="sc">%between%</span><span class="fu">pmppm</span>(homarine_mz, <span class="dv">5</span>)]</span>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>homarine_MS2<span class="sc">$</span>int <span class="ot">&lt;-</span> homarine_MS2<span class="sc">$</span>int<span class="sc">/</span><span class="fu">max</span>(homarine_MS2<span class="sc">$</span>int)</span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="fu">ggplot</span>(homarine_MS2) <span class="sc">+</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>fragmz, <span class="at">y=</span>int)) <span class="sc">+</span></span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>fragmz, <span class="at">xend=</span>fragmz, <span class="at">y=</span>int, <span class="at">yend=</span><span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">5</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;0%&quot;</span>, <span class="st">&quot;50%&quot;</span>, <span class="st">&quot;100%&quot;</span>)) <span class="sc">+</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Fragment m/z&quot;</span>, <span class="at">y=</span><span class="st">&quot;&quot;</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" width="80%" style="display: block; margin: auto;" /></p>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt; Warning in max(homarine_MS2$int): no non-missing arguments to max; returning</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; -Inf</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="fu">ggplot</span>(homarine_MS2) <span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>fragmz, <span class="at">y=</span>int)) <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>fragmz, <span class="at">xend=</span>fragmz, <span class="at">y=</span>int, <span class="at">yend=</span><span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">5</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;0%&quot;</span>, <span class="st">&quot;50%&quot;</span>, <span class="st">&quot;100%&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Fragment m/z&quot;</span>, <span class="at">y=</span><span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnAAAAEgCAMAAAADq777AAAAaVBMVEUAAAAAADoAAGYAOpAAZrY6AAA6ADo6AGY6OpA6kNtmAABmAGZmOpBmtv+QOgCQOjqQkDqQkGaQtpCQ27aQ29uQ2/+2ZgC22/+2///bkDrb///r6+v/tmb/25D/27b/29v//7b//9v///8qTbxjAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAEf0lEQVR4nO3Y7VIbZQCA0fDRIiioVSLBRIH7v0h3swk0JNYK9alDz/mxQ152M8nMM+9HZg8Qmn3tD8C3RXCkBEdKcKQER0pwpP4+uN/hyxEcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGREhwpwZESHCnBkRIcKcGR+ufg4D8gOFKCIyU4UoIjJbh991eztcsXPPvHb4dGV9/dvvIzvRmC23d/df7SR1fvrw8NL178hm+O4PZ9+eDmL5ks3ybB7XsMbnX20+z4ZvVuWF6HkbuL2dGHs5vV+w/DwPk4ejktv8c3D9Pg5Ti4fnb3prvvpzd52Sr9tghu31Nw707HzoZKFsc3dxfnw99jfye3D4vZeDm+ub8a7lic3E6Dwz83M9zOTQ/L0837nn6tr/T/Ibh9m0PD+ZDN0Nqf435/CGk5lLNuahycLpvBIcnt66fgPrppu4Wbnzg6CO6Apxluymc51Hd0vRhzWZ1Nk9j2spjOs+fb14/BfXzT/Y/rwXGuQ3D7doO7uzi6Xrd1MLjNpPXJ4O5+GG9aHh08T3xrBLdvN7jl2NRQy3r1XB7vBret6JPBrbdwepsIbt+z4MYJ7t3R9eOhYWe1vBpyHO54nMwuLp+e3F7m2/0cgjvk2R5uPuzgfhlCGn8W+flZcOsDxrTkTq/ns9PHJzeXX8ct3Hy91zPLCe7fWTpovpLgPte4tPol7dUE99nGn0D09lqCIyU4UoIjJThSgiMlOFKCI/UXq+wBsC76L6YAAAAASUVORK5CYII=" width="80%" style="display: block; margin: auto;" /></p>
 <p>This is also the perfect place to enable some interactivity with
 packages such as <code>plotly</code>, making data exploration not only
 simple but also highly intuitive.</p>
@@ -714,54 +726,6 @@ in a range around that mass:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="right">4.202267</td>
-<td align="right">138.0550</td>
-<td align="right">94.06548</td>
-<td align="right">2639.737</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="even">
-<td align="right">4.561233</td>
-<td align="right">138.0550</td>
-<td align="right">94.06560</td>
-<td align="right">4301.696</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="odd">
-<td align="right">4.900883</td>
-<td align="right">138.0550</td>
-<td align="right">94.06550</td>
-<td align="right">1678.091</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="even">
-<td align="right">5.719433</td>
-<td align="right">138.0550</td>
-<td align="right">94.06572</td>
-<td align="right">32145.883</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="odd">
-<td align="right">5.832950</td>
-<td align="right">139.0520</td>
-<td align="right">94.06569</td>
-<td align="right">698355.375</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="even">
-<td align="right">6.063700</td>
-<td align="right">138.0549</td>
-<td align="right">94.06567</td>
-<td align="right">15944193.000</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
 </tbody>
 </table>
 <p>We find that there’s not only homarine that produces that fragment,
@@ -778,15 +742,6 @@ loss as homarine:</p>
 <span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>msdata<span class="sc">$</span>MS2[neutral_loss<span class="sc">%between%</span><span class="fu">pmppm</span>(homarine_neutral_loss, <span class="at">ppm =</span> <span class="dv">5</span>)] <span class="sc">%&gt;%</span></span>
 <span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(int)) <span class="sc">%&gt;%</span> <span class="fu">head</span>() <span class="sc">%&gt;%</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
 <table>
-<colgroup>
-<col width="12%" />
-<col width="11%" />
-<col width="11%" />
-<col width="16%" />
-<col width="14%" />
-<col width="10%" />
-<col width="22%" />
-</colgroup>
 <thead>
 <tr class="header">
 <th align="right">rt</th>
@@ -799,60 +754,6 @@ loss as homarine:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="right">6.063700</td>
-<td align="right">138.0549</td>
-<td align="right">94.06567</td>
-<td align="right">43.98918</td>
-<td align="right">15944193.0</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="even">
-<td align="right">6.399933</td>
-<td align="right">138.0549</td>
-<td align="right">94.06569</td>
-<td align="right">43.98921</td>
-<td align="right">11094394.0</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="odd">
-<td align="right">8.438167</td>
-<td align="right">138.0549</td>
-<td align="right">94.06567</td>
-<td align="right">43.98921</td>
-<td align="right">1218680.0</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="even">
-<td align="right">11.810417</td>
-<td align="right">104.0710</td>
-<td align="right">60.08154</td>
-<td align="right">43.98949</td>
-<td align="right">556172.8</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="odd">
-<td align="right">11.469117</td>
-<td align="right">104.0710</td>
-<td align="right">60.08154</td>
-<td align="right">43.98947</td>
-<td align="right">509088.7</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
-<tr class="even">
-<td align="right">6.739650</td>
-<td align="right">138.0550</td>
-<td align="right">94.06568</td>
-<td align="right">43.98931</td>
-<td align="right">334129.3</td>
-<td align="right">35</td>
-<td align="left">DDApos_2.mzML.gz</td>
-</tr>
 </tbody>
 </table>
 <p>We can again confirm our suspicions that there’s another signal with
@@ -926,7 +827,7 @@ discarded.</p>
 <span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>  <span class="er">|====================================================</span>                  <span class="er">|</span>  <span class="dv">75</span>%</span>
 <span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a><span class="co">#&gt; Total time: 1.75 secs</span></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a><span class="co">#&gt; Total time: 0.82 secs</span></span>
 <span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a></span>
 <span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>mzs_of_interest <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">adenine=</span><span class="fl">136.06232</span>, <span class="at">valine=</span><span class="fl">118.0865</span>)</span>
 <span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>small_data <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(data_files, <span class="at">grab_what =</span> <span class="fu">c</span>(<span class="st">&quot;EIC&quot;</span>, <span class="st">&quot;EIC_MS2&quot;</span>),</span>
@@ -942,7 +843,7 @@ discarded.</p>
 <span id="cb18-26"><a href="#cb18-26" tabindex="-1"></a>  <span class="er">|====================================================</span>                  <span class="er">|</span>  <span class="dv">75</span>%</span>
 <span id="cb18-27"><a href="#cb18-27" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb18-29"><a href="#cb18-29" tabindex="-1"></a><span class="co">#&gt; Total time: 1.92 secs</span></span>
+<span id="cb18-29"><a href="#cb18-29" tabindex="-1"></a><span class="co">#&gt; Total time: 0.85 secs</span></span>
 <span id="cb18-30"><a href="#cb18-30" tabindex="-1"></a></span>
 <span id="cb18-31"><a href="#cb18-31" tabindex="-1"></a>all_data<span class="sc">$</span>MS1 <span class="sc">%&gt;%</span></span>
 <span id="cb18-32"><a href="#cb18-32" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">type=</span><span class="st">&quot;All data&quot;</span>) <span class="sc">%&gt;%</span></span>
@@ -958,7 +859,7 @@ discarded.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a></span>
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="co"># Size reduction factor:</span></span>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="fu">as.numeric</span>(<span class="fu">object.size</span>(all_data)<span class="sc">/</span><span class="fu">object.size</span>(small_data))</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co">#&gt; [1] 16.10698</span></span></code></pre></div>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co">#&gt; [1] 22.02611</span></span></code></pre></div>
 <p>As expected, the size of the <code>small_data</code> object is much
 smaller than the <code>all_data</code> object, here by a factor of about
 15x. For files that haven’t already been “minified”, that size reduction
@@ -986,7 +887,7 @@ mass.</p>
 <span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>  <span class="er">|====================================================</span>                  <span class="er">|</span>  <span class="dv">75</span>%</span>
 <span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a><span class="co">#&gt; Total time: 1.38 secs</span></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a><span class="co">#&gt; Total time: 0.64 secs</span></span>
 <span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a></span>
 <span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>all_data<span class="sc">$</span>MS1 <span class="sc">%&gt;%</span></span>
 <span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">type=</span><span class="st">&quot;All data&quot;</span>) <span class="sc">%&gt;%</span></span>
@@ -997,11 +898,11 @@ mass.</p>
 <span id="cb20-21"><a href="#cb20-21" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
 <span id="cb20-22"><a href="#cb20-22" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>rt, <span class="at">y=</span>TIC, <span class="at">color=</span>filename)) <span class="sc">+</span></span>
 <span id="cb20-23"><a href="#cb20-23" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>type, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" width="80%" style="display: block; margin: auto;" /></p>
+<p><img src="data:image/png;base64,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" width="80%" style="display: block; margin: auto;" /></p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a></span>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="co"># Size reduction factor:</span></span>
 <span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a><span class="fu">as.numeric</span>(<span class="fu">object.size</span>(all_data)<span class="sc">/</span><span class="fu">object.size</span>(small_data))</span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="co">#&gt; [1] 6.731661</span></span></code></pre></div>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="co">#&gt; [1] 7.554597</span></span></code></pre></div>
 <p>The savings are also worth noting here, but constraining the
 retention time also speeds up data retrieval slightly. Since
 <em>m/z</em> and intensity data is encoded in mzML and mzXML files while
@@ -1024,32 +925,32 @@ but this is not always the case. To examine bottlenecks,
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="co">#&gt; Reading file DDApos_2.mzML.gz... 0.48 secs </span></span>
-<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.31 secs </span></span>
-<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="co">#&gt; Reading MS2 data...0.15 secs </span></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="co">#&gt; Reading file Blank_129I_1L_pos_20240207-MS3.mzML.gz... 0.06 secs </span></span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.01 secs </span></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="co">#&gt; Reading MS2 data...0.01 secs </span></span>
 <span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a>  <span class="er">|==================</span>                                                    <span class="er">|</span>  <span class="dv">25</span>%</span>
-<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_AB.mzML.gz... 0.14 secs </span></span>
-<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.11 secs </span></span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_AB.mzML.gz... 0.12 secs </span></span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.2 secs </span></span>
 <span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="co">#&gt; Reading MS2 data...0.01 secs </span></span>
 <span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a>  <span class="er">|===================================</span>                                   <span class="er">|</span>  <span class="dv">50</span>%</span>
-<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_CD.mzML.gz... 0.17 secs </span></span>
-<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.14 secs </span></span>
-<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a><span class="co">#&gt; Reading MS2 data...0.02 secs </span></span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_CD.mzML.gz... 0.12 secs </span></span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.1 secs </span></span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a><span class="co">#&gt; Reading MS2 data...0.01 secs </span></span>
 <span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb22-21"><a href="#cb22-21" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a>  <span class="er">|====================================================</span>                  <span class="er">|</span>  <span class="dv">75</span>%</span>
-<span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_EF.mzML.gz... 0.15 secs </span></span>
-<span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.32 secs </span></span>
+<span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a><span class="co">#&gt; Reading file LB12HL_EF.mzML.gz... 0.14 secs </span></span>
+<span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a><span class="co">#&gt; Reading MS1 data...0.1 secs </span></span>
 <span id="cb22-25"><a href="#cb22-25" tabindex="-1"></a><span class="co">#&gt; Reading MS2 data...0.01 secs </span></span>
 <span id="cb22-26"><a href="#cb22-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb22-27"><a href="#cb22-27" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb22-28"><a href="#cb22-28" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
 <span id="cb22-29"><a href="#cb22-29" tabindex="-1"></a><span class="co">#&gt; Binding files together into single data.table</span></span>
-<span id="cb22-30"><a href="#cb22-30" tabindex="-1"></a><span class="co">#&gt; Total time: 2.04 secs</span></span></code></pre></div>
+<span id="cb22-30"><a href="#cb22-30" tabindex="-1"></a><span class="co">#&gt; Total time: 0.9 secs</span></span></code></pre></div>
 <p>In general, slow file read times can be improved by compressing the
 data. mzML files are highly compressible, with options to compress both
 the data itself using the <code>zlib</code> method and the files as a
@@ -1160,7 +1061,7 @@ thing.</p>
 <p>For more information about the mzML data format and its history,
 check out the specification at <a href="https://www.psidev.info/mzML" class="uri">https://www.psidev.info/mzML</a>.</p>
 <hr />
-<p>Vignette last built on 2023-12-13</p>
+<p>Vignette last built on 2024-03-02</p>
 </div>
 </div>
 

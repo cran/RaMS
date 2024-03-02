@@ -4,7 +4,7 @@
 \alias{grabMzxmlMS1}
 \title{Extract the MS1 data from an mzXML nodeset}
 \usage{
-grabMzxmlMS1(xml_data, file_metadata, rtrange, prefilter)
+grabMzxmlMS1(xml_data, file_metadata, rtrange, prefilter, incl_polarity)
 }
 \arguments{
 \item{xml_data}{An `xml2` nodeset, usually created by applying `read_xml` to
@@ -20,6 +20,10 @@ the final object's size.}
 
 \item{prefilter}{The lowest intensity value of interest, used to reduce file
 size (and especially useful for profile mode data with many 0 values)}
+
+\item{incl_polarity}{Boolean determining whether the polarity of the scan
+should be returned as a column in the table (positive mode = 1, negative
+mode = -1)}
 }
 \value{
 A `data.table` with columns for retention time (rt), m/z (mz),

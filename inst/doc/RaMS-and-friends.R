@@ -21,7 +21,7 @@ file.remove("MS1_data.csv")
 library(openxlsx)
 
 # Locate an MS2 file
-MS2_file <- system.file("extdata", "DDApos_2.mzML.gz", package = "RaMS")
+MS2_file <- system.file("extdata", "S30657.mzML.gz", package = "RaMS")
 
 # Grab the MS1 and MS2 data
 msdata <- grabMSdata(MS2_file, grab_what=c("MS1", "MS2"))
