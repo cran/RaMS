@@ -49,7 +49,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -368,14 +368,14 @@ files can overwhelm common file readers.</p>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co"># Grab the MS data</span></span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(single_file, <span class="at">grab_what =</span> <span class="st">&quot;everything&quot;</span>)</span></code></pre></div>
 <pre><code>## 
-## Reading file LB12HL_AB.mzML.gz... 0.12 secs 
-## Reading MS1 data...0.11 secs 
-## Reading MS2 data...0.01 secs 
-## Reading BPC...0.06 secs 
-## Reading TIC...0.06 secs 
-## Reading file metadata...0.1 secs 
+## Reading file LB12HL_AB.mzML.gz... 0.21 secs 
+## Reading MS1 data...0.25 secs 
+## Reading MS2 data...0.02 secs 
+## Reading BPC...0.08 secs 
+## Reading TIC...0.08 secs 
+## Reading file metadata...0.13 secs 
 ## Binding files together into single data.table
-## Total time: 0.46 secs</code></pre>
+## Total time: 0.77 secs</code></pre>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Write out MS1 data to .csv file</span></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="at">x =</span> msdata<span class="sc">$</span>MS1, <span class="at">file =</span> <span class="st">&quot;MS1_data.csv&quot;</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
@@ -400,11 +400,11 @@ functionality.</p>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co"># Grab the MS1 and MS2 data</span></span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(MS2_file, <span class="at">grab_what=</span><span class="fu">c</span>(<span class="st">&quot;MS1&quot;</span>, <span class="st">&quot;MS2&quot;</span>))</span></code></pre></div>
 <pre><code>## 
-## Reading file S30657.mzML.gz... 0.2 secs 
-## Reading MS1 data...0.14 secs 
-## Reading MS2 data...0.04 secs 
+## Reading file S30657.mzML.gz... 0.35 secs 
+## Reading MS1 data...0.19 secs 
+## Reading MS2 data...0.06 secs 
 ## Binding files together into single data.table
-## Total time: 0.38 secs</code></pre>
+## Total time: 0.61 secs</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Write out MS data to Excel file</span></span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co"># openxlsx writes each object in a list to a unique sheet</span></span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># Produces one sheet for MS1 and one for MS2</span></span>
@@ -427,14 +427,8 @@ functionality.</p>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                            <span class="st">&quot;extdata/LB12HL_CD.mzML.gz&quot;</span>), </span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                          <span class="at">package =</span> <span class="st">&quot;RaMS&quot;</span>)</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(mzml_files)</span></code></pre></div>
-<pre><code>## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |===================================                                   |  50%
-  |                                                                            
-  |======================================================================| 100%
-## Total time: 0.95 secs</code></pre>
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
+## Total time: 1.34 secs</code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Create the sqlite database and connect to it</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>MSdb <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">&quot;MSdata.sqlite&quot;</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
@@ -458,14 +452,14 @@ functionality.</p>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>extra_file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;LB12HL_EF.mzML.gz&quot;</span>, <span class="at">package =</span> <span class="st">&quot;RaMS&quot;</span>)</span>
 <span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>extra_msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(extra_file, <span class="at">grab_what =</span> <span class="st">&quot;everything&quot;</span>)</span></code></pre></div>
 <pre><code>## 
-## Reading file LB12HL_EF.mzML.gz... 0.12 secs 
-## Reading MS1 data...0.1 secs 
-## Reading MS2 data...0.01 secs 
-## Reading BPC...0.07 secs 
-## Reading TIC...0.06 secs 
-## Reading file metadata...0.11 secs 
+## Reading file LB12HL_EF.mzML.gz... 0.2 secs 
+## Reading MS1 data...0.13 secs 
+## Reading MS2 data...0.02 secs 
+## Reading BPC...0.08 secs 
+## Reading TIC...0.1 secs 
+## Reading file metadata...0.14 secs 
 ## Binding files together into single data.table
-## Total time: 0.47 secs</code></pre>
+## Total time: 0.67 secs</code></pre>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">dbGetQuery</span>(MSdb, <span class="st">&#39;SELECT COUNT(*) FROM MS1&#39;</span>) <span class="co"># Initial number of rows</span></span></code></pre></div>
 <pre><code>##   COUNT(*)
 ## 1    42313</code></pre>
@@ -500,16 +494,8 @@ Python code chunks as shown below.</p>
 <span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>file_paths <span class="ot">&lt;-</span> <span class="fu">list.files</span>(data_dir, <span class="at">pattern =</span> <span class="st">&quot;HL.*mzML&quot;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a></span>
 <span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>msdata <span class="ot">&lt;-</span> <span class="fu">grabMSdata</span>(<span class="at">files =</span> file_paths, <span class="at">grab_what =</span> <span class="st">&quot;BPC&quot;</span>)<span class="sc">$</span>BPC</span></code></pre></div>
-<pre><code>## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |=======================                                               |  33%
-  |                                                                            
-  |===============================================                       |  67%
-  |                                                                            
-  |======================================================================| 100%
-## Total time: 0.3 secs</code></pre>
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
+## Total time: 0.44 secs</code></pre>
 </div>
 <div id="python-code-chunk-python" class="section level3">
 <h3>Python code chunk: {python}</h3>

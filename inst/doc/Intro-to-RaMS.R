@@ -49,7 +49,8 @@ ggplot(msdata$BPC) + geom_line(aes(x=rt, y=int, color=filename))
 ## ----ggplotdemo, dpi=144------------------------------------------------------
 ggplot(msdata$BPC) + 
   geom_polygon(aes(x=rt, y=int, color=filename), lwd=1, fill="#FFFFFF44") +
-  theme(legend.position = c(0.8, 0.7), plot.title = element_text(face="bold"),
+  theme(legend.position = "inside", legend.position.inside=c(0.8, 0.7), 
+        plot.title = element_text(face="bold"),
         axis.title = element_text(size = 15)) +
   scale_y_continuous(labels = c(0, "250M", "500M"), breaks = c(0, 2.5e8, 5e8)) +
   scale_colour_manual(values = c("#2596be", "#6c25be", "#bea925")) +
@@ -72,33 +73,32 @@ library(data.table)
 
 adenine_mz <- 136.06232
 
-adenine_data <- msdata$MS1[mz%between%pmppm(adenine_mz, ppm=5)]
+adenine_data <- msdata$MS1[mz%between%pmppm(adenine_mz, ppm=5)][rt%between%c(4, 9)]
 
-ggplot(adenine_data) + geom_line(aes(x=rt, y=int, color=filename)) + lims(x=c(4, 9))
+ggplot(adenine_data) + geom_line(aes(x=rt, y=int, color=filename))
 
 ## ----multicmpdplot------------------------------------------------------------
-mzs_of_interest <- c(adenine=136.06232, valine=118.0865, homarine=138.055503)
+mzs_of_interest <- c(Adenine=136.06232, Valine=118.0865, Homarine=138.055503)
 
-mass_data <- imap_dfr(mzs_of_interest, function(mz_i, name){
+mass_data <- imap(mzs_of_interest, function(mz_i, name){
   cbind(msdata$MS1[mz%between%pmppm(mz_i, ppm=10)], name)
-})
+}) %>%
+  bind_rows() %>%
+  filter(rt%between%c(4, 9))
 
 ggplot(mass_data) + 
   geom_line(aes(x=rt, y=int, color=filename)) + 
-  facet_wrap(~name, ncol = 1, scales = "free_y") +
-  lims(x=c(4, 9))
+  facet_wrap(~name, ncol = 1, scales = "free_y")
 
 ## ----MS2data------------------------------------------------------------------
-msdata <- grabMSdata(data_files[1], grab_what = "everything")
+msdata <- grabMSdata(data_files[1], grab_what = c("MS1", "MS2", "MS3"))
 knitr::kable(head(msdata$MS2, 3))
 
 ## ----MS2demo------------------------------------------------------------------
-homarine_mz <- 137.047678+1.007276
+iodine_MS2 <- msdata$MS2[premz%between%pmppm(351.0818, 5)][rt==min(rt)]
+iodine_MS2$int <- iodine_MS2$int/max(iodine_MS2$int)
 
-homarine_MS2 <- msdata$MS2[premz%between%pmppm(homarine_mz, 5)]
-homarine_MS2$int <- homarine_MS2$int/max(homarine_MS2$int)
-
-ggplot(homarine_MS2) +
+ggplot(iodine_MS2) +
   geom_point(aes(x=fragmz, y=int)) +
   geom_segment(aes(x=fragmz, xend=fragmz, y=int, yend=0)) +
   scale_y_continuous(breaks = c(0, .5, 1), labels = c("0%", "50%", "100%")) +
@@ -107,23 +107,23 @@ ggplot(homarine_MS2) +
 ## ----plotly, eval=FALSE-------------------------------------------------------
 #  ## Not run to save space in the vignette:
 #  library(plotly)
-#  msdata <- grabMSdata(data_files, grab_what = c("MS1", "MS2", "BPC"))
 #  
 #  compound_MS1 <- msdata$MS1 %>%
-#    filter(mz%between%pmppm(homarine_mz, 10)) %>%
-#    filter(!str_detect(filename, "DDA"))
+#    filter(mz%between%pmppm(351.0818, 10)) %>%
+#    filter(!str_detect(filename, "DDA")) %>%
+#    slice_max(int, by = rt)
 #  
-#  compound_MS2 <- msdata$MS2[premz%between%pmppm(homarine_mz, 10)] %>%
+#  compound_MS2 <- msdata$MS2[premz%between%pmppm(351.0818, 10)] %>%
 #    group_by(rt) %>%
 #    arrange(desc(int)) %>%
+#    slice(1:10) %>%
 #    summarise(frags=paste(
 #      paste(round(fragmz, digits = 3), round(int), sep = ": "), collapse = "\n"),
 #      .groups="drop"
 #    ) %>%
 #    mutate(int=approx(x = compound_MS1$rt, y=compound_MS1$int, xout = rt)$y)
 #  plot_ly(compound_MS1) %>%
-#    add_trace(type="scatter", mode="lines", x=~rt, y=~int, color=~filename,
-#              hoverinfo="none") %>%
+#    add_trace(type="scatter", mode="lines", x=~rt, y=~int, hoverinfo="none") %>%
 #    add_trace(type="scatter", mode="markers", x=~rt, y=~int,
 #              text=~frags, hoverinfo="text", showlegend=FALSE,
 #              marker=list(color="black"), data = compound_MS2) %>%
@@ -131,17 +131,11 @@ ggplot(homarine_MS2) +
 #                            text="Mouse over to see\nMSMS fragments"))
 
 ## ----homarine_fragsearch------------------------------------------------------
-homarine_frag_mz <- 94.06567
-msdata$MS2[fragmz%between%pmppm(homarine_frag_mz, ppm = 5)] %>%
+msdata$MS2[fragmz%between%pmppm(57.07, ppm = 10)] %>%
   head() %>% knitr::kable()
 
-## ----homarine_neutsearch------------------------------------------------------
-homarine_neutral_loss <- homarine_mz - homarine_frag_mz
-
-msdata$MS2 <- mutate(msdata$MS2, neutral_loss=premz-fragmz) %>%
-  select("rt", "premz", "fragmz", "neutral_loss", "int", "voltage", "filename")
-msdata$MS2[neutral_loss%between%pmppm(homarine_neutral_loss, ppm = 5)] %>%
-  arrange(desc(int)) %>% head() %>% knitr::kable()
+## -----------------------------------------------------------------------------
+msdata$MS3 %>% head() %>% knitr::kable()
 
 ## ----fig.height=3-------------------------------------------------------------
 chrom_file <- system.file("extdata", "wk_chrom.mzML.gz", package = "RaMS")
@@ -154,10 +148,10 @@ ptitle <- with(given_chrom, paste0(
 plot(given_chrom$rt, given_chrom$int, type="l", main=ptitle)
 
 ## ----EICdemo------------------------------------------------------------------
-all_data <- grabMSdata(data_files, grab_what = c("MS1", "MS2"))
+all_data <- grabMSdata(data_files[-1], grab_what = c("MS1", "MS2"))
 
 mzs_of_interest <- c(adenine=136.06232, valine=118.0865)
-small_data <- grabMSdata(data_files, grab_what = c("EIC", "EIC_MS2"),
+small_data <- grabMSdata(data_files[-1], grab_what = c("EIC", "EIC_MS2"),
                          mz=mzs_of_interest, ppm = 5)
 
 all_data$MS1 %>%
@@ -175,7 +169,7 @@ all_data$MS1 %>%
 as.numeric(object.size(all_data)/object.size(small_data))
 
 ## ----rtrangedemo--------------------------------------------------------------
-small_data <- grabMSdata(data_files, grab_what = c("MS1", "MS2"), rtrange = c(6, 8))
+small_data <- grabMSdata(data_files[-1], grab_what = c("MS1", "MS2"), rtrange = c(6, 8))
 
 all_data$MS1 %>%
   mutate(type="All data") %>%

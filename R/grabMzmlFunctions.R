@@ -283,7 +283,7 @@ grabMzmlMetadata <- function(xml_data){
   time_node <- xml2::xml_find_first(xml_data, xpath = "//d1:run")
   time_val <- xml2::xml_attr(time_node, "startTimeStamp")
   if(!is.na(time_val)){
-    time_stamp <- as.POSIXct(strptime(time_val, "%Y-%m-%dT%H:%M:%SZ"))
+    time_stamp <- as.POSIXct(strptime(time_val, "%Y-%m-%dT%H:%M:%SZ", tz="UTC"))
   } else {
     time_stamp <- as.POSIXct(NA)
   }
@@ -756,7 +756,7 @@ grabSpectraPremz <- function(xml_nodes){
 }
 
 
-#' Extract the collison energies from the spectra of an mzML nodeset
+#' Extract the collision energies from the spectra of an mzML nodeset
 #'
 #' Although the collision energy is typically fixed per file, it's equally fast
 #' (afaik) to just grab them all individually here. Also, I'm worried about

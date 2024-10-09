@@ -76,7 +76,7 @@ data.table::setDTthreads(2)
 #  plot(tmzml_chrom_data$rt, tmzml_chrom_data$int, type="l")
 
 ## ----arrow--------------------------------------------------------------------
-#  write_dataset(rams_obj$MS1, path = "vignettes/figures/ssc_vignette_renders/pqds")
+#  write_dataset(rams_obj$MS1[order(mz)], path = "vignettes/figures/ssc_vignette_renders/pqds")
 #  arrow_data <- open_dataset("vignettes/figures/ssc_vignette_renders/pqds") %>%
 #    filter(mz%between%pmppm(432.2810, ppm = 20)) %>%
 #    dplyr::collect()
@@ -91,12 +91,22 @@ data.table::setDTthreads(2)
 #  sql_data <- dbGetQuery(MSdb, EIC_query, params = query_params)
 #  plot(sql_data$rt, sql_data$int, type="l")
 #  
-#  rs <- dbSendQuery(MSdb, "CREATE INDEX mz ON MS1 (mz)")
-#  dbClearResult(rs)
+#  dbClearResult(dbSendQuery(MSdb, "CREATE INDEX mz ON MS1 (mz)"))
 #  sql_data <- dbGetQuery(MSdb, EIC_query, params = query_params)
 #  sql_data <- sql_data[order(sql_data$filename, sql_data$rt),]
 #  plot(sql_data$rt, sql_data$int, type="l")
 #  dbDisconnect(MSdb)
+
+## -----------------------------------------------------------------------------
+#  msduck <- dbConnect(duckdb::duckdb(), "vignettes/figures/ssc_vignette_renders/duckdb")
+#  dbWriteTable(msduck, "MS1", rams_obj$MS1[order(mz)], overwrite=TRUE)
+#  
+#  EIC_query <- paste('SELECT * FROM MS1 WHERE mz BETWEEN', pmppm(432.2810, ppm = 20)[1],
+#                     'AND', pmppm(432.2810, ppm = 20)[2])
+#  duck_data <- dbGetQuery(msduck, EIC_query)
+#  duck_data <- duck_data[order(duck_data$filename, duck_data$rt),]
+#  plot(duck_data$rt, duck_data$int, type="l")
+#  dbDisconnect(msduck)
 
 ## ----time2make----------------------------------------------------------------
 #  msnexp_make_fun <- function(){
@@ -139,15 +149,23 @@ data.table::setDTthreads(2)
 #    dbDisconnect(MSdb_idx)
 #    unlink("vignettes/figures/ssc_vignette_renders/MSdata_idx.sqlite")
 #  }
+#  duckdb_make_fun <- function(){
+#    msdata <- grabMSdata(ms_files, grab_what="MS1")
+#    msduck <- dbConnect(duckdb::duckdb(), "vignettes/figures/ssc_vignette_renders/duckdb")
+#    dbWriteTable(msduck, "MS1", rams_obj$MS1[order(mz)], overwrite=TRUE)
+#    dbDisconnect(msduck)
+#    unlink("vignettes/figures/ssc_vignette_renders/duckdb")
+#  }
 #  
 #  make_timings <- microbenchmark(
 #    msnexp_make_fun(), ondisk_make_fun(), spectra_make_fun(), rams_make_fun(),
 #    tmzml_make_fun(), arrow_make_fun(), sql_make_fun(), sqlidx_make_fun(),
+#    duckdb_make_fun(),
 #    times = 10)
-#  saveRDS(make_timings, "vignettes/figures/ssc_vignette_renders/make_timings.rds")
+#  write_csv(make_timings, "vignettes/figures/ssc_vignette_renders/make_timings.csv")
 
 ## ----plot time2make-----------------------------------------------------------
-#  make_timings <- readRDS("vignettes/figures/ssc_vignette_renders/make_timings.rds")
+#  make_timings <- read_csv("vignettes/figures/ssc_vignette_renders/make_timings.csv")
 #  make_timings %>%
 #    as.data.frame() %>%
 #    arrange(expr) %>%
@@ -157,9 +175,9 @@ data.table::setDTthreads(2)
 #      TRUE~"Single-time only"
 #    )) %>%
 #    mutate(expr=factor(expr, levels=c("msnexp", "ondisk", "spectra", "rams",
-#                                      "tmzml", "arrow", "sql", "sqlidx"),
+#                                      "tmzml", "arrow", "sql", "sqlidx", "duckdb"),
 #                       labels=c("MSnExp", "OnDiskMSnExp", "Spectra", "RaMS",
-#                                "tmzMLs", "Arrow", "SQL", "SQL (indexed)"))) %>%
+#                                "tmzMLs", "Arrow", "SQL", "SQL (indexed)", "DuckDB"))) %>%
 #    ggplot() +
 #    geom_boxplot(aes(x=expr, y=time/1e9)) +
 #    geom_hline(yintercept = 0) +
@@ -198,10 +216,10 @@ data.table::setDTthreads(2)
 #  }
 #  
 #  par_timings <- microbenchmark(par_rams(), unpar_rams(), par_tmzml(), unpar_tmzml(), times = 5)
-#  saveRDS(par_timings, "vignettes/figures/ssc_vignette_renders/par_timings.rds")
+#  write_csv(par_timings, "vignettes/figures/ssc_vignette_renders/par_timings.csv")
 
 ## ----parallel proc plot-------------------------------------------------------
-#  par_timings <- readRDS("vignettes/figures/ssc_vignette_renders/par_timings.rds")
+#  par_timings <- read_csv("vignettes/figures/ssc_vignette_renders/par_timings.csv")
 #  par_timings %>%
 #    as.data.frame() %>%
 #    separate(expr, into = c("sub_type", "par_type"), sep = "_") %>%
@@ -229,7 +247,7 @@ data.table::setDTthreads(2)
 #  dir.create("vignettes/figures/ssc_vignette_renders/tmzMLs")
 #  mapply(tmzmlMaker, ms_files, tmzml_names)
 #  
-#  write_dataset(rams_obj$MS1, path = "vignettes/figures/ssc_vignette_renders/pqds")
+#  write_dataset(rams_obj$MS1[order(mz)], path = "vignettes/figures/ssc_vignette_renders/pqds")
 #  
 #  MSdb <- dbConnect(RSQLite::SQLite(), "vignettes/figures/ssc_vignette_renders/MSdata.sqlite")
 #  dbWriteTable(MSdb, "MS1", rams_obj$MS1, overwrite=TRUE)
@@ -237,9 +255,12 @@ data.table::setDTthreads(2)
 #  
 #  MSdb_idx <- dbConnect(RSQLite::SQLite(), "vignettes/figures/ssc_vignette_renders/MSdata_idx.sqlite")
 #  dbWriteTable(MSdb_idx, "MS1", rams_obj$MS1, overwrite=TRUE)
-#  rs <- dbSendQuery(MSdb_idx, "CREATE INDEX mz ON MS1 (mz)")
-#  dbClearResult(rs)
+#  dbClearResult(dbSendQuery(MSdb_idx, "CREATE INDEX mz ON MS1 (mz)"))
 #  dbDisconnect(MSdb_idx)
+#  
+#  msduck <- dbConnect(duckdb::duckdb(), "vignettes/figures/ssc_vignette_renders/duckdb")
+#  dbWriteTable(msduck, "MS1", rams_obj$MS1[order(mz)], overwrite=TRUE)
+#  dbDisconnect(msduck)
 #  
 #  msnexp_query_fun <- function(){
 #    plot(chromatogram(msnexp_obj, mz=pmppm(432.2810, ppm = 20)))
@@ -272,6 +293,7 @@ data.table::setDTthreads(2)
 #    arrow_data <- open_dataset("vignettes/figures/ssc_vignette_renders/pqds") %>%
 #      filter(mz%between%pmppm(432.2810, ppm = 20)) %>%
 #      dplyr::collect()
+#    arrow_data <- arrow_data[order(arrow_data$filename, arrow_data$rt),]
 #    plot(arrow_data$rt, arrow_data$int, type="l")
 #  }
 #  sql_query_fun <- function(){
@@ -281,6 +303,7 @@ data.table::setDTthreads(2)
 #    names(query_params) <- c("lower_bound", "upper_bound")
 #    sql_data <- dbGetQuery(MSdb, EIC_query, params = query_params)
 #    plot(sql_data$rt, sql_data$int, type="l")
+#    dbDisconnect(MSdb)
 #  }
 #  sqlidx_query_fun <- function(){
 #    MSdb_idx <- dbConnect(RSQLite::SQLite(), "vignettes/figures/ssc_vignette_renders/MSdata_idx.sqlite")
@@ -290,18 +313,30 @@ data.table::setDTthreads(2)
 #    sql_data <- dbGetQuery(MSdb_idx, EIC_query, params = query_params)
 #    sql_data <- sql_data[order(sql_data$filename, sql_data$rt),]
 #    plot(sql_data$rt, sql_data$int, type="l")
+#    dbDisconnect(MSdb_idx)
 #  }
+#  duckdb_query_fun <- function(){
+#    msduck <- dbConnect(duckdb::duckdb(), "vignettes/figures/ssc_vignette_renders/duckdb")
+#    EIC_query <- paste('SELECT * FROM MS1 WHERE mz BETWEEN', pmppm(432.2810, ppm = 20)[1],
+#                     'AND', pmppm(432.2810, ppm = 20)[2])
+#    duck_data <- dbGetQuery(msduck, EIC_query)
+#    duck_data <- duck_data[order(duck_data$filename, duck_data$rt),]
+#    plot(duck_data$rt, duck_data$int, type="l")
+#    dbDisconnect(msduck)
+#  }
+#  # Could be optimized by doing the ordering within the query
 #  
 #  query_timings <- microbenchmark(
 #    msnexp_query_fun(), ondisk_query_fun(), spectra_query_fun(), rams_query_fun(),
 #    tmzml_query_fun(), arrow_query_fun(), sql_query_fun(), sqlidx_query_fun(),
+#    duckdb_query_fun(),
 #    times = 10
 #  )
 #  query_timings
-#  saveRDS(query_timings, "vignettes/figures/ssc_vignette_renders/query_timings.rds")
+#  write_csv(query_timings, "vignettes/figures/ssc_vignette_renders/query_timings.csv")
 
 ## ----time2query plot----------------------------------------------------------
-#  query_timings <- readRDS("vignettes/figures/ssc_vignette_renders/query_timings.rds")
+#  query_timings <- read_csv("vignettes/figures/ssc_vignette_renders/query_timings.csv")
 #  query_timings %>%
 #    as.data.frame() %>%
 #    arrange(expr) %>%
@@ -311,9 +346,9 @@ data.table::setDTthreads(2)
 #      TRUE~"Single-time only"
 #    )) %>%
 #    mutate(expr=factor(expr, levels=c("msnexp", "ondisk", "spectra", "rams",
-#                                      "tmzml", "arrow", "sql", "sqlidx"),
+#                                      "tmzml", "arrow", "sql", "sqlidx", "duckdb"),
 #                       labels=c("MSnExp", "OnDiskMSnExp", "Spectra", "RaMS",
-#                                "tmzMLs", "Arrow", "SQL", "SQL (indexed)"))) %>%
+#                                "tmzMLs", "Arrow", "SQL", "SQL (indexed)", "DuckDB"))) %>%
 #    ggplot() +
 #    geom_boxplot(aes(x=expr, y=time/1e9)) +
 #    scale_y_log10() +
@@ -398,22 +433,39 @@ data.table::setDTthreads(2)
 #    }) %>% bind_rows() %>% distinct()
 #  }
 #  
+#  msduck <- dbConnect(duckdb::duckdb(), "vignettes/figures/ssc_vignette_renders/duckdb")
+#  duckdb_uni_fun <- function(){
+#    print("DuckDB unified")
+#    dbGetQuery(msduck, sql_comb_call)
+#  }
+#  duckdb_loop_fun <- function(){
+#    print("DuckDB loop")
+#    lapply(mzs_to_grab, function(mz_i){
+#      EIC_query <- paste('SELECT * FROM MS1 WHERE mz BETWEEN', pmppm(mz_i, ppm = 20)[1],
+#                         'AND', pmppm(mz_i, ppm = 20)[2])
+#      sql_data <- dbGetQuery(msduck, EIC_query)
+#    }) %>% bind_rows() %>% distinct()
+#  }
+#  
+#  
 #  multichrom_timings <- microbenchmark(
 #    rams_uni_fun(), rams_loop_fun(), arrow_uni_fun(), arrow_loop_fun(),
-#    sql_uni_fun(), sql_loop_fun(), times = 10
+#    sql_uni_fun(), sql_loop_fun(), duckdb_uni_fun(), duckdb_loop_fun(),
+#    times = 10
 #  )
-#  saveRDS(multichrom_timings, "vignettes/figures/ssc_vignette_renders/multichrom_timings.rds")
-#  
-#  multichrom_timings <- readRDS("vignettes/figures/ssc_vignette_renders/multichrom_timings.rds")
+#  write_csv(multichrom_timings, "vignettes/figures/ssc_vignette_renders/multichrom_timings.csv")
+
+## ----multichrom query plot----------------------------------------------------
+#  multichrom_timings <- read_csv("vignettes/figures/ssc_vignette_renders/multichrom_timings.csv")
 #  multichrom_timings %>%
 #    as.data.frame() %>%
 #    arrange(expr) %>%
 #    mutate(expr=str_remove(expr, "_fun\\(\\)")) %>%
 #    separate(expr, into = c("expr", "query_type"), sep = "_") %>%
-#    mutate(expr=factor(expr, levels=c("rams", "arrow", "sql"),
-#                       labels=c("RaMS", "Arrow", "SQL"))) %>%
+#    mutate(expr=factor(expr, levels=c("rams", "arrow", "sql", "duckdb"),
+#                       labels=c("RaMS", "Arrow", "SQL", "DuckDB"))) %>%
 #    mutate(query_type=factor(query_type, levels=c("uni", "loop"),
-#                             labels=c("Unified query", "Query loop"))) %>%
+#                             labels=c("Unified query", "Loop"))) %>%
 #    ggplot() +
 #    geom_boxplot(aes(x=query_type, y=time/1e9), lwd=1) +
 #    facet_wrap(~expr, nrow=1) +
@@ -463,18 +515,25 @@ data.table::setDTthreads(2)
 #  rs <- dbSendQuery(MSdb_idx, "CREATE INDEX mz ON MS1 (mz)")
 #  dbClearResult(rs)
 #  dbDisconnect(MSdb_idx)
-#  size_list$MSdb_idx <- file.size("vignettes/figures/ssc_vignette_renders/MSdata_idx.sqlite")
+#  size_list$MSdb_idx <- file.size("vignettes/figures/ssc_vignette_renders/MSdata.sqlite")
 #  unlink("vignettes/figures/ssc_vignette_renders/MSdata.sqlite")
 #  
-#  saveRDS(size_list, "vignettes/figures/ssc_vignette_renders/size_list.rds")
-
-## ----plot size info-----------------------------------------------------------
-#  size_list <- readRDS("vignettes/figures/ssc_vignette_renders/size_list.rds")
+#  msduck <- dbConnect(duckdb::duckdb(), "vignettes/figures/ssc_vignette_renders/duckdb")
+#  dbWriteTable(msduck, "MS1", rams_obj$MS1[order(mz)], overwrite=TRUE)
+#  size_list$msduck <- file.size("vignettes/figures/ssc_vignette_renders/duckdb")
+#  dbDisconnect(msduck)
+#  unlink("vignettes/figures/ssc_vignette_renders/duckdb")
+#  
 #  size_list %>%
-#    within(rm(mzXML)) %>%
-#    sapply(as.numeric) %>%
+#    unlist() %>%
 #    data.frame(bytes=.) %>%
 #    rownames_to_column("expr") %>%
+#    write_csv("vignettes/figures/ssc_vignette_renders/size_list.csv")
+
+## ----plot size info-----------------------------------------------------------
+#  size_df <- read_csv("vignettes/figures/ssc_vignette_renders/size_list.csv")
+#  size_df %>%
+#    filter(expr!="mzXML") %>%
 #    mutate(expr=str_remove(expr, "_obj")) %>%
 #    mutate(expr=str_replace(expr, "MSdb_?", "sql")) %>%
 #    mutate(mem_type=case_when(
@@ -483,28 +542,25 @@ data.table::setDTthreads(2)
 #    )) %>%
 #    mutate(mem_type=factor(mem_type, levels=c("Memory", "Disk"))) %>%
 #    mutate(expr=factor(expr, levels=c("msnexp", "ondisk", "spectra", "rams",
-#                                      "tmzml", "arrow", "sql", "sqlidx"),
-#                       labels=c("MSnExp", "OnDiskMSnExp", "Spectra", "RaMS",
-#                                "tmzMLs", "Arrow", "SQL", "SQL (indexed)"))) %>%
+#                                      "tmzml", "arrow", "sql", "sqlidx", "duckdb"),
+#                       labels=c("MSnExp", "OnDisk\nMSnExp", "Spectra", "RaMS",
+#                                "tmzMLs", "Arrow", "SQL", "SQL\n(indexed)", "DuckDB"))) %>%
 #    ggplot() +
-#    geom_hline(yintercept = size_list$mzXML/(1024^3)) +
+#    geom_hline(yintercept = size_df$bytes[size_df$expr=="mzXML"]/(1024^3)) +
 #    geom_point(aes(x=expr, y=bytes/(1024^3))) +
 #    scale_y_log10(breaks=c(0.001, 0.01, 0.1, 1, 10), labels=c("1MB", "10MB", "100MB", "1GB", "10GB"),
 #                  limits=c(0.001, 10)) +
-#    facet_wrap(~mem_type, scales = "free_x") +
+#    facet_grid(~mem_type, scales = "free_x", space = "free_x") +
 #    labs(x=NULL, y=NULL)
 #  ggsave("vignettes/figures/ssc_vignette_renders/size_cons.png", width = 6.5, height = 4, units = "in", device = "png", dpi = 144)
 
 ## ----summary plot-------------------------------------------------------------
-#  make_timings <- readRDS("vignettes/figures/ssc_vignette_renders/make_timings.rds")
-#  query_timings <- readRDS("vignettes/figures/ssc_vignette_renders/query_timings.rds")
-#  size_df <- readRDS("vignettes/figures/ssc_vignette_renders/size_list.rds") %>%
-#    sapply(as.numeric) %>%
-#    data.frame(size=.) %>%
-#    mutate(size=size/1024^3) %>%
-#    rownames_to_column("expr") %>%
+#  make_timings <- read_csv("vignettes/figures/ssc_vignette_renders/make_timings.csv")
+#  query_timings <- read_csv("vignettes/figures/ssc_vignette_renders/query_timings.csv")
+#  size_df <- read_csv("vignettes/figures/ssc_vignette_renders/size_list.csv") %>%
 #    mutate(expr=str_remove(expr, "_obj")) %>%
-#    mutate(expr=str_replace(expr, "MSdb_?", "sql"))
+#    mutate(expr=str_replace(expr, "MSdb_?", "sql")) %>%
+#    mutate(expr=ifelse(expr=="msduck", "duckdb", expr))
 #  
 #  bind_rows(make_timings, query_timings) %>%
 #    as.data.frame() %>%
@@ -519,9 +575,9 @@ data.table::setDTthreads(2)
 #      TRUE~"Disk"
 #    )) %>%
 #    mutate(expr=factor(expr, levels=c("msnexp", "ondisk", "spectra", "rams",
-#                                      "tmzml", "arrow", "sql", "sqlidx"),
+#                                      "tmzml", "arrow", "sql", "sqlidx", "duckdb"),
 #                       labels=c("MSnExp", "OnDiskMSnExp", "Spectra", "RaMS",
-#                                "tmzMLs", "Arrow", "SQL", "SQL (indexed)"))) %>%
+#                                "tmzMLs", "Arrow", "SQL", "SQL (indexed)", "DuckDB"))) %>%
 #    pivot_wider(names_from = time_type, values_from=c("med_time", "IQR_time")) %>%
 #    ggplot() +
 #    geom_vline(xintercept = 0) +
@@ -530,8 +586,7 @@ data.table::setDTthreads(2)
 #    geom_linerange(aes(y=med_time_query, xmin=med_time_make-IQR_time_make*2,
 #                       xmax=med_time_make+IQR_time_make*2, color=expr)) +
 #    geom_point(aes(x=med_time_make, y=med_time_query, color=expr,
-#                   size=size, shape=rep_type)) +
-#    scale_shape_manual(values=c(16, 15)) +
+#                   size=bytes, shape=rep_type)) +
 #    scale_y_log10() +
 #    coord_flip() +
 #    guides(color = guide_legend(order = 1), shape = guide_legend(order = 2),
@@ -539,7 +594,7 @@ data.table::setDTthreads(2)
 #    labs(x="Time to transform (s)", y="Time to query (s)", color=NULL, size="Size (GB)",
 #         shape="Storage") +
 #    theme_bw()
-#  ggsave("vignettes/figures/ssc_vignette_renders/sum_plot.png", width = 6.5, height = 5, units = "in", device = "png", dpi = 144)
+#  ggsave("vignettes/figures/ssc_vignette_renders/sum_plot.png", width = 6.5, height = 5.5, units = "in", device = "png", dpi = 144)
 #  
 #  
 #  # bind_rows(make_timings, query_timings) %>%
@@ -553,11 +608,60 @@ data.table::setDTthreads(2)
 #  #   left_join(size_df) %>%
 #  #   plotly::plot_ly(x=~make, y=~query, z=~size, hovertext=~expr,
 #  #                   type="scatter3d", mode="markers")
+#  
+#  
+#  bind_rows(make_timings, query_timings) %>%
+#    as.data.frame() %>%
+#    group_by(expr) %>%
+#    mutate(time=time/1e9) %>%
+#    summarise(med_time=median(time), IQR_time=IQR(time)) %>%
+#    mutate(expr=str_remove(expr, "_fun\\(\\)")) %>%
+#    separate(expr, into = c("expr", "time_type")) %>%
+#    left_join(size_df, by = join_by(expr)) %>%
+#    mutate(rep_type=case_when(
+#      expr%in%c("msnexp", "ondisk", "spectra", "rams")~"Memory",
+#      TRUE~"Disk"
+#    )) %>%
+#    mutate(expr=factor(expr, levels=c("msnexp", "ondisk", "spectra", "rams",
+#                                      "tmzml", "arrow", "sql", "sqlidx", "duckdb"),
+#                       labels=c("MSnExp", "OnDiskMSnExp", "Spectra", "RaMS",
+#                                "tmzMLs", "Arrow", "SQL", "SQL (indexed)", "DuckDB"))) %>%
+#    pivot_wider(names_from = time_type, values_from=c("med_time", "IQR_time")) %>%
+#    ggplot() +
+#    geom_linerange(aes(x=bytes, ymin=med_time_query-IQR_time_query,
+#                       ymax=med_time_query+IQR_time_query, color=expr), linewidth=1) +
+#    geom_point(aes(x=bytes, y=med_time_query, color=expr), size=3) +
+#    scale_y_log10() +
+#    guides(color = guide_legend(order = 1)) +
+#    labs(x="Size (GB)", y="Time to query (s)") +
+#    theme_bw()
+#  
+#  # query_timings %>%
+#  #   as.data.frame() %>%
+#  #   group_by(expr) %>%
+#  #   mutate(time=time/1e9) %>%
+#  #   mutate(expr=str_remove(expr, "_query.*")) %>%
+#  #   left_join(size_df) %>%
+#  #   mutate(rep_type=case_when(
+#  #     expr%in%c("msnexp", "ondisk", "spectra", "rams")~"Memory",
+#  #     TRUE~"Disk"
+#  #   )) %>%
+#  #   mutate(expr=factor(expr, levels=c("msnexp", "ondisk", "spectra", "rams",
+#  #                                     "tmzml", "arrow", "sql", "sqlidx", "duckdb"),
+#  #                      labels=c("MSnExp", "OnDiskMSnExp", "Spectra", "RaMS",
+#  #                               "tmzMLs", "Arrow", "SQL", "SQL (indexed)", "DuckDB"))) %>%
+#  #   ggplot() +
+#  #   geom_point(aes(x=size, y=time, fill=expr), size=3, pch=21, alpha=0.7) +
+#  #   scale_y_log10() +
+#  #   guides(color = guide_legend(order = 1)) +
+#  #   labs(x="Size (GB)", y="Time to query (s)") +
+#  #   theme_bw()
 
 ## ----cleanup------------------------------------------------------------------
-#  unlink("vignettes/figures/ssc_vignette_renders/tmzMLs", recursive = TRUE)
-#  unlink("vignettes/figures/ssc_vignette_renders/pqds", recursive = TRUE)
-#  unlink("vignettes/figures/ssc_vignette_renders/MSdata.sqlite")
-#  unlink("vignettes/figures/ssc_vignette_renders/MSdata_idx.sqlite")
-#  unlink("vignettes/figures/ssc_vignette_renders/Sample/", recursive = TRUE)
+#  # unlink("vignettes/figures/ssc_vignette_renders/tmzMLs", recursive = TRUE)
+#  # unlink("vignettes/figures/ssc_vignette_renders/pqds", recursive = TRUE)
+#  # unlink("vignettes/figures/ssc_vignette_renders/MSdata.sqlite")
+#  # unlink("vignettes/figures/ssc_vignette_renders/MSdata_idx.sqlite")
+#  # unlink("vignettes/figures/ssc_vignette_renders/duckdb")
+#  # unlink("vignettes/figures/ssc_vignette_renders/Sample/", recursive = TRUE)
 
